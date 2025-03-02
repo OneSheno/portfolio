@@ -124,7 +124,6 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualizar a cada 60 segundos
     setInterval(fetchDiscordProfile, 60000);
-    
     // Music Player code
     const audioPlayer = document.getElementById('audio-player');
     const playButton = document.getElementById('play');
@@ -139,46 +138,117 @@ document.addEventListener('DOMContentLoaded', function() {
     const songArtistElement = document.getElementById('song-artist');
     const songCoverElement = document.getElementById('song-cover');
     
-    // List of songs - using local files
-    const songs = [
-        {
-            title: "Phonk Music",
-            artist: "Kordhell",
-            src: "music/phonk-music.mp3",
-            cover: "https://i.ytimg.com/vi/PCo8OrFs2U8/maxresdefault.jpg"
-        },
-        {
-            title: "Murder In My Mind",
-            artist: "Kordhell",
-            src: "music/murder-in-my-mind.mp3",
-            cover: "https://i.ytimg.com/vi/gykWYPrArbY/maxresdefault.jpg"
-        }
-    ];
+    // Spotify API credentials - substitua com suas próprias credenciais
+    const clientId = '898f5ae84a3e4d95861025964ec25b52';
+    const clientSecret = 'ab7cf8a060c1497eba1114a1c6f0bb1e';
     
+    // Playlist do Spotify - substitua com o ID da sua playlist
+    const playlistId = '37i9dQZF1DX4SBhb3fqCJd'; // Exemplo: playlist Lo-Fi Beats
+    
+    // Token de acesso do Spotify
+    let accessToken = '';
+    
+    // Obter token de acesso do Spotify
+    async function getSpotifyToken() {
+        const result = await fetch('https://accounts.spotify.com/api/token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
+            },
+            body: 'grant_type=client_credentials'
+        });
+    
+        const data = await result.json();
+        accessToken = data.access_token;
+        return accessToken;
+    }
+    
+    // Obter faixas da playlist do Spotify
+    async function getPlaylistTracks() {
+        const token = await getSpotifyToken();
+        
+        const result = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=10`, {
+            method: 'GET',
+            headers: { 'Authorization': 'Bearer ' + token }
+        });
+    
+        const data = await result.json();
+        return data.items.map(item => ({
+            title: item.track.name,
+            artist: item.track.artists.map(artist => artist.name).join(', '),
+            cover: item.track.album.images[0].url,
+            preview: item.track.preview_url,
+            external_url: item.track.external_urls.spotify
+        })).filter(track => track.preview !== null);
+    }
+    
+    // Lista de músicas
+    let songs = [];
     let currentSongIndex = 0;
     let isPlaying = false;
     
-    // Load the first song
-    loadSong(songs[currentSongIndex]);
+    // Inicializar o player de música
+    async function initMusicPlayer() {
+        try {
+            songs = await getPlaylistTracks();
+            console.log("Músicas carregadas:", songs);
+            
+            if (songs.length > 0) {
+                loadSong(songs[currentSongIndex]);
+            } else {
+                console.error("Nenhuma música com preview disponível encontrada");
+                // Usar músicas de fallback se não conseguir carregar do Spotify
+                useFallbackSongs();
+            }
+        } catch (error) {
+            console.error("Erro ao inicializar o player de música:", error);
+            useFallbackSongs();
+        }
+    }
+    
+    // Usar músicas de fallback se o Spotify falhar
+    function useFallbackSongs() {
+        songs = [
+            {
+                title: "Phonk Music",
+                artist: "Kordhell",
+                src: "https://files.catbox.moe/2jzzps.mp3",
+                cover: "https://i.ytimg.com/vi/PCo8OrFs2U8/maxresdefault.jpg"
+            },
+            {
+                title: "Murder In My Mind",
+                artist: "Kordhell",
+                src: "https://files.catbox.moe/qbw9ck.mp3",
+                cover: "https://i.ytimg.com/vi/gykWYPrArbY/maxresdefault.jpg"
+            }
+        ];
+        loadSong(songs[currentSongIndex]);
+    }
     
     function loadSong(song) {
         songTitleElement.textContent = song.title;
         songArtistElement.textContent = song.artist;
         songCoverElement.src = song.cover;
-        audioPlayer.src = song.src;
+        // Se for do Spotify, use o preview_url
+        if (song.preview) {
+            audioPlayer.src = song.preview;
+        } else {
+            audioPlayer.src = song.src;
+        }
         
         // Preload audio
         audioPlayer.load();
+        console.log("Carregando música:", song.title);
     }
     
     function playSong() {
         isPlaying = true;
         playButton.innerHTML = '<i class="fas fa-pause"></i>';
         audioPlayer.play().catch(error => {
-            console.error("Error playing audio:", error);
+            console.error("Erro ao reproduzir áudio:", error);
         });
     }
-    
     function pauseSong() {
         isPlaying = false;
         playButton.innerHTML = '<i class="fas fa-play"></i>';
@@ -218,6 +288,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
+    // Iniciar o player de música
+    initMusicPlayer();
+    
+    // O resto do código do player permanece o mesmo
     // Update progress bar
     audioPlayer.addEventListener('timeupdate', function() {
         const duration = audioPlayer.duration;
