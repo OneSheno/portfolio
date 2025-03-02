@@ -159,18 +159,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const songArtistElement = document.getElementById('song-artist');
     const songCoverElement = document.getElementById('song-cover');
     
-    // List of songs - using GitHub as host for audio files
+    // List of songs - using local files
     const songs = [
         {
             title: "Phonk Music",
             artist: "Kordhell",
-            src: "https://github.com/OneSheno/portfolio/raw/main/music/phonk-music.mp3",
+            src: "music/phonk-music.mp3",
             cover: "https://i.ytimg.com/vi/PCo8OrFs2U8/maxresdefault.jpg"
         },
         {
             title: "Murder In My Mind",
             artist: "Kordhell",
-            src: "https://github.com/OneSheno/portfolio/raw/main/music/murder-in-my-mind.mp3",
+            src: "music/murder-in-my-mind.mp3",
             cover: "https://i.ytimg.com/vi/gykWYPrArbY/maxresdefault.jpg"
         }
     ];
