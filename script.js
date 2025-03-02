@@ -2,113 +2,84 @@ document.addEventListener('DOMContentLoaded', function() {
     // Discord user information
     const discordUserId = '1154576298803466290';
     
-    // Fetch Discord profile using Lanyard API with WebSocket for real-time updates
-    const ws = new WebSocket('wss://api.lanyard.rest/socket');
+    console.log("Iniciando busca de perfil do Discord...");
     
-    ws.onopen = () => {
-        console.log('WebSocket connected');
-        // Subscribe to updates for your Discord ID
-        ws.send(JSON.stringify({
-            op: 2,
-            d: {
-                subscribe_to_ids: [discordUserId]
-            }
-        }));
-    };
-    
-    ws.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        console.log('WebSocket message:', data);
+    // Função para buscar dados do Discord via REST API
+    function fetchDiscordProfile() {
+        console.log("Buscando perfil via REST API...");
         
-        // Handle different operation codes
-        if (data.op === 1) {
-            // Heartbeat
-            setInterval(() => {
-                ws.send(JSON.stringify({ op: 3 }));
-            }, data.d.heartbeat_interval);
-        } else if (data.op === 0) {
-            // Event
-            if (data.t === 'INIT_STATE' || data.t === 'PRESENCE_UPDATE') {
-                if (data.d[discordUserId]) {
-                    updateDiscordProfile(data.d[discordUserId]);
-                }
-            }
-        }
-    };
-    
-    ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-        // Fallback to REST API
-        fetchDiscordProfileREST();
-    };
-    
-    ws.onclose = () => {
-        console.log('WebSocket closed');
-        // Fallback to REST API
-        fetchDiscordProfileREST();
-    };
-    
-    function fetchDiscordProfileREST() {
         fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
             .then(response => {
+                console.log("Status da resposta:", response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Lanyard API response:", data);
+                console.log("Dados completos recebidos:", data);
                 
                 if (data.success) {
                     updateDiscordProfile(data.data);
                 } else {
+                    console.error("API retornou resposta sem sucesso");
                     fallbackDiscordInfo();
                 }
             })
             .catch(error => {
-                console.error('Error fetching Discord profile:', error);
+                console.error('Erro ao buscar perfil do Discord:', error);
                 fallbackDiscordInfo();
             });
     }
     
     function updateDiscordProfile(userData) {
+        console.log("Atualizando perfil com dados:", userData);
+        
         // Update avatar
         const avatarElement = document.getElementById('discord-avatar');
         if (avatarElement && userData.discord_user && userData.discord_user.avatar) {
             const avatarHash = userData.discord_user.avatar;
             const avatarUrl = `https://cdn.discordapp.com/avatars/${discordUserId}/${avatarHash}?size=128`;
+            console.log("Definindo avatar URL:", avatarUrl);
             avatarElement.src = avatarUrl;
-            console.log("Avatar URL:", avatarUrl);
         } else {
-            console.error("Avatar element not found or no avatar data");
+            console.error("Avatar element not found or no avatar data:", 
+                          {element: !!avatarElement, user: !!userData.discord_user, 
+                           avatar: userData.discord_user?.avatar});
             if (avatarElement) {
                 avatarElement.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
             }
         }
-        
-        // Update username
+        // Update username and discriminator
         const nameElement = document.getElementById('discord-name');
         if (nameElement && userData.discord_user) {
             nameElement.textContent = userData.discord_user.username || "Shennon";
+            console.log("Nome definido:", userData.discord_user.username);
+            
+            // Update discriminator if it exists
+            const discriminatorElement = document.getElementById('discord-discriminator');
+            if (discriminatorElement) {
+                // Discord is phasing out discriminators, so check if it exists
+                if (userData.discord_user.discriminator && userData.discord_user.discriminator !== '0') {
+                    discriminatorElement.textContent = `#${userData.discord_user.discriminator}`;
+                } else {
+                    discriminatorElement.textContent = ''; // Remove discriminator if not present
+                }
+            }
         }
         
         // Update status
-        const statusElement = document.querySelector('.discord-status i');
-        if (statusElement) {
-            statusElement.className = 'fas fa-circle';
-            const statusContainer = document.querySelector('.discord-status');
+        const statusContainer = document.querySelector('.discord-status');
+        if (statusContainer) {
+            console.log("Status atual:", userData.discord_status);
             
             if (userData.discord_status === 'online') {
-                statusElement.style.color = '#43b581';
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #43b581;"></i> Online';
             } else if (userData.discord_status === 'idle') {
-                statusElement.style.color = '#faa61a';
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #faa61a;"></i> Ausente';
             } else if (userData.discord_status === 'dnd') {
-                statusElement.style.color = '#f04747';
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #f04747;"></i> Não perturbe';
             } else {
-                statusElement.style.color = '#747f8d';
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #747f8d;"></i> Offline';
             }
             
@@ -120,15 +91,18 @@ document.addEventListener('DOMContentLoaded', function() {
                     statusText.className = 'discord-custom-status';
                     statusText.textContent = customStatus.state;
                     statusContainer.appendChild(statusText);
+                    console.log("Status personalizado adicionado:", customStatus.state);
                 }
             }
         } else {
-            console.error("Status element not found");
+            console.error("Elemento de status não encontrado");
         }
     }
     
     // Fallback function for Discord info
     function fallbackDiscordInfo() {
+        console.log("Usando informações de fallback");
+        
         const avatarElement = document.getElementById('discord-avatar');
         if (avatarElement) {
             avatarElement.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
@@ -144,6 +118,12 @@ document.addEventListener('DOMContentLoaded', function() {
             statusElement.innerHTML = '<i class="fas fa-circle" style="color: #747f8d;"></i> Offline';
         }
     }
+    
+    // Buscar perfil imediatamente
+    fetchDiscordProfile();
+    
+    // Atualizar a cada 60 segundos
+    setInterval(fetchDiscordProfile, 60000);
     
     // Music Player code
     const audioPlayer = document.getElementById('audio-player');
