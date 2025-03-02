@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shennon | Links</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="profile">
+            <img src="profile-picture.jpg" alt="Shennon" class="profile-pic">
+            <h1>@Shennon</h1>
+            <p>Reverse engineering | Enthusiast C++ | Pythonzudo</p>
+        </div>
+
+        <div class="discord-profile">
+            <img id="discord-avatar" class="discord-avatar" alt="Discord Avatar">
+            <div class="discord-info">
+                <div class="discord-username">
+                    <span id="discord-name">Shennon</span>
+                    <span class="discord-tag" id="discord-discriminator">#0000</span>
+                </div>
+                <div class="discord-status">
+                    <i class="fas fa-circle"></i> Online
+                </div>
+            </div>
+        </div>
+        
+        <div class="music-player">
+            <div class="music-player-header">
+                <i class="fas fa-music"></i>
+                <h3>Now Playing</h3>
+            </div>
+            <div class="song-info">
+                <img id="song-cover" src="https://i.imgur.com/placeholder.jpg" alt="Song Cover" class="song-cover">
+                <div class="song-details">
+                    <div class="song-title" id="song-title">Loading song...</div>
+                    <div class="song-artist" id="song-artist">Artist</div>
+                </div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar"></div>
+            </div>
+            <div class="time-info">
+                <span id="current-time">0:00</span>
+                <span id="duration">0:00</span>
+            </div>
+            <div class="music-controls">
+                <button class="control-button" id="prev"><i class="fas fa-step-backward"></i></button>
+                <button class="control-button" id="play"><i class="fas fa-play"></i></button>
+                <button class="control-button" id="next"><i class="fas fa-step-forward"></i></button>
+                <button class="control-button" id="volume"><i class="fas fa-volume-up"></i></button>
+            </div>
+            <audio id="audio-player"></audio>
+        </div>
+
+        <div class="links">
+            <a href="#" class="link-card">
+                <i class="fab fa-github"></i>
+                <span>GitHub</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fab fa-discord"></i>
+                <span>Discord Server</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fab fa-youtube"></i>
+                <span>YouTube Channel</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fab fa-telegram"></i>
+                <span>Telegram</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fas fa-code"></i>
+                <span>My Projects</span>
+            </a>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
