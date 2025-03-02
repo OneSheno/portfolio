@@ -138,108 +138,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const songArtistElement = document.getElementById('song-artist');
     const songCoverElement = document.getElementById('song-cover');
     
-    // Spotify API credentials - substitua com suas próprias credenciais
-    const clientId = '898f5ae84a3e4d95861025964ec25b52';
-    const clientSecret = 'ab7cf8a060c1497eba1114a1c6f0bb1e';
+    // List of songs - using GitHub repository URLs
+    const songs = [
+        {
+            title: "Your Betrayal",
+            artist: "Bullet For My Valentine",
+            src: "./music/Bullet For My Valentine - Your Betrayal (Official Video) - bulletvalentineVEVO.mp3",
+            cover: "https://i.ytimg.com/vi/IHgFJEJgUrg/maxresdefault.jpg"
+        }
+    ];
     
-    // Playlist do Spotify - substitua com o ID da sua playlist
-    const playlistId = '37i9dQZF1DX4SBhb3fqCJd'; // Exemplo: playlist Lo-Fi Beats
-    
-    // Token de acesso do Spotify
-    let accessToken = '';
-    
-    // Obter token de acesso do Spotify
-    async function getSpotifyToken() {
-        const result = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
-                'Authorization': 'Basic ' + btoa(clientId + ':' + clientSecret)
-            },
-            body: 'grant_type=client_credentials'
-        });
-    
-        const data = await result.json();
-        accessToken = data.access_token;
-        return accessToken;
-    }
-    
-    // Obter faixas da playlist do Spotify
-    async function getPlaylistTracks() {
-        const token = await getSpotifyToken();
-        
-        const result = await fetch(`https://api.spotify.com/v1/playlists/${playlistId}/tracks?limit=10`, {
-            method: 'GET',
-            headers: { 'Authorization': 'Bearer ' + token }
-        });
-    
-        const data = await result.json();
-        return data.items.map(item => ({
-            title: item.track.name,
-            artist: item.track.artists.map(artist => artist.name).join(', '),
-            cover: item.track.album.images[0].url,
-            preview: item.track.preview_url,
-            external_url: item.track.external_urls.spotify
-        })).filter(track => track.preview !== null);
-    }
-    
-    // Lista de músicas
-    let songs = [];
     let currentSongIndex = 0;
     let isPlaying = false;
     
-    // Inicializar o player de música
-    async function initMusicPlayer() {
-        try {
-            songs = await getPlaylistTracks();
-            console.log("Músicas carregadas:", songs);
-            
-            if (songs.length > 0) {
-                loadSong(songs[currentSongIndex]);
-            } else {
-                console.error("Nenhuma música com preview disponível encontrada");
-                // Usar músicas de fallback se não conseguir carregar do Spotify
-                useFallbackSongs();
-            }
-        } catch (error) {
-            console.error("Erro ao inicializar o player de música:", error);
-            useFallbackSongs();
-        }
-    }
-    
-    // Usar músicas de fallback se o Spotify falhar
-    function useFallbackSongs() {
-        songs = [
-            {
-                title: "Phonk Music",
-                artist: "Kordhell",
-                src: "https://files.catbox.moe/2jzzps.mp3",
-                cover: "https://i.ytimg.com/vi/PCo8OrFs2U8/maxresdefault.jpg"
-            },
-            {
-                title: "Murder In My Mind",
-                artist: "Kordhell",
-                src: "https://files.catbox.moe/qbw9ck.mp3",
-                cover: "https://i.ytimg.com/vi/gykWYPrArbY/maxresdefault.jpg"
-            }
-        ];
-        loadSong(songs[currentSongIndex]);
-    }
+    // Load the first song
+    loadSong(songs[currentSongIndex]);
     
     function loadSong(song) {
         songTitleElement.textContent = song.title;
         songArtistElement.textContent = song.artist;
         songCoverElement.src = song.cover;
-        // Se for do Spotify, use o preview_url
-        if (song.preview) {
-            audioPlayer.src = song.preview;
-        } else {
-            audioPlayer.src = song.src;
-        }
-        
-        // Preload audio
+        audioPlayer.src = song.src;
         audioPlayer.load();
-        console.log("Carregando música:", song.title);
     }
     
     function playSong() {
@@ -255,8 +175,8 @@ document.addEventListener('DOMContentLoaded', function() {
         audioPlayer.pause();
     }
     
-    // Play/Pause event
-    playButton.addEventListener('click', function() {
+    // Event Listeners
+    playButton.addEventListener('click', () => {
         if (isPlaying) {
             pauseSong();
         } else {
@@ -264,71 +184,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Previous song
-    prevButton.addEventListener('click', function() {
+    prevButton.addEventListener('click', () => {
         currentSongIndex--;
         if (currentSongIndex < 0) {
             currentSongIndex = songs.length - 1;
         }
         loadSong(songs[currentSongIndex]);
-        if (isPlaying) {
-            playSong();
-        }
+        if (isPlaying) playSong();
     });
     
-    // Next song
-    nextButton.addEventListener('click', function() {
+    nextButton.addEventListener('click', () => {
         currentSongIndex++;
-        if (currentSongIndex > songs.length - 1) {
+        if (currentSongIndex >= songs.length) {
             currentSongIndex = 0;
         }
         loadSong(songs[currentSongIndex]);
-        if (isPlaying) {
-            playSong();
-        }
+        if (isPlaying) playSong();
     });
     
-    // Iniciar o player de música
-    initMusicPlayer();
-    
-    // O resto do código do player permanece o mesmo
-    // Update progress bar
-    audioPlayer.addEventListener('timeupdate', function() {
-        const duration = audioPlayer.duration;
-        const currentTime = audioPlayer.currentTime;
+    // Progress bar update
+    audioPlayer.addEventListener('timeupdate', () => {
+        const { duration, currentTime } = audioPlayer;
         const progressPercent = (currentTime / duration) * 100;
         progressBar.style.width = `${progressPercent}%`;
         
-        // Update time info
+        // Update time displays
         const currentMinutes = Math.floor(currentTime / 60);
         const currentSeconds = Math.floor(currentTime % 60);
-        currentTimeElement.textContent = 
-            `${currentMinutes}:${currentSeconds < 10 ? '0' : ''}${currentSeconds}`;
+        currentTimeElement.textContent = `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')}`;
         
         if (!isNaN(duration)) {
             const totalMinutes = Math.floor(duration / 60);
             const totalSeconds = Math.floor(duration % 60);
-            durationElement.textContent = 
-                `${totalMinutes}:${totalSeconds < 10 ? '0' : ''}${totalSeconds}`;
+            durationElement.textContent = `${totalMinutes}:${totalSeconds.toString().padStart(2, '0')}`;
         }
     });
     
     // Click on progress bar
-    progressContainer.addEventListener('click', function(e) {
-        const width = this.clientWidth;
+    progressContainer.addEventListener('click', (e) => {
+        const width = progressContainer.clientWidth;
         const clickX = e.offsetX;
         const duration = audioPlayer.duration;
         audioPlayer.currentTime = (clickX / width) * duration;
     });
     
-    // Song ends
-    audioPlayer.addEventListener('ended', function() {
-        nextButton.click();
-    });
-    
     // Volume control
     let isMuted = false;
-    volumeButton.addEventListener('click', function() {
+    volumeButton.addEventListener('click', () => {
         if (isMuted) {
             audioPlayer.volume = 1;
             volumeButton.innerHTML = '<i class="fas fa-volume-up"></i>';
@@ -338,5 +240,10 @@ document.addEventListener('DOMContentLoaded', function() {
             volumeButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
             isMuted = true;
         }
+    });
+    
+    // Auto-play next song
+    audioPlayer.addEventListener('ended', () => {
+        nextButton.click();
     });
 });
