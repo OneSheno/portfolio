@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
 
-    setInterval(animateTitle, 3000);
+    setInterval(animateTitle, 2000);
 
     // Discord user information
     const discordUserId = '1154576298803466290';
