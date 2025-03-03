@@ -250,11 +250,31 @@ document.addEventListener('DOMContentLoaded', function() {
     // Background selector functionality
     const bgButtons = document.querySelectorAll('.bg-button');
     const body = document.body;
+    let particleInstance = null;
+    
+    // Adiciona botão para partículas animadas
+    const backgroundSelector = document.querySelector('.background-selector');
+    const particleButton = document.createElement('button');
+    particleButton.className = 'bg-button';
+    particleButton.setAttribute('data-bg', 'bg-particles');
+    particleButton.textContent = 'Partículas';
+    backgroundSelector.appendChild(particleButton);
     
     // Remove todas as classes de background
     function removeBackgroundClasses() {
-        body.classList.remove('bg-gradient-purple', 'bg-gradient-blue', 'bg-gradient-dark', 'bg-pattern-dots', 'bg-pattern-lines');
+        body.classList.remove('bg-gradient-purple', 'bg-gradient-blue', 'bg-gradient-dark', 'bg-pattern-dots', 'bg-pattern-lines', 'bg-particles');
     }
+    
+    // Função para mostrar ou esconder o canvas de partículas
+    function toggleParticles(show) {
+        const canvas = document.querySelector('.particle-background');
+        if (canvas) {
+            canvas.style.display = show ? 'block' : 'none';
+        }
+    }
+    
+    // Inicialmente esconde as partículas
+    toggleParticles(false);
     
     // Adiciona event listeners para os botões de background
     bgButtons.forEach(button => {
@@ -262,6 +282,9 @@ document.addEventListener('DOMContentLoaded', function() {
             const bgClass = button.getAttribute('data-bg');
             removeBackgroundClasses();
             body.classList.add(bgClass);
+            
+            // Mostra ou esconde partículas baseado na seleção
+            toggleParticles(bgClass === 'bg-particles');
             
             // Salva a preferência do usuário no localStorage
             localStorage.setItem('preferredBackground', bgClass);
@@ -278,10 +301,25 @@ document.addEventListener('DOMContentLoaded', function() {
         removeBackgroundClasses();
         body.classList.add(savedBackground);
         
+        // Mostra ou esconde partículas baseado na seleção salva
+        toggleParticles(savedBackground === 'bg-particles');
+        
         // Marca o botão correspondente como ativo
         const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
         if (activeButton) {
             activeButton.classList.add('active');
         }
     }
-})
+        removeBackgroundClasses();
+        body.classList.add(savedBackground);
+        
+        // Mostra ou esconde partículas baseado na seleção salva
+        toggleParticles(savedBackground === 'bg-particles');
+        
+        // Marca o botão correspondente como ativo
+        const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
+)
