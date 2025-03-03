@@ -246,4 +246,42 @@ document.addEventListener('DOMContentLoaded', function() {
     audioPlayer.addEventListener('ended', () => {
         nextButton.click();
     });
-});
+    
+    // Background selector functionality
+    const bgButtons = document.querySelectorAll('.bg-button');
+    const body = document.body;
+    
+    // Remove todas as classes de background
+    function removeBackgroundClasses() {
+        body.classList.remove('bg-gradient-purple', 'bg-gradient-blue', 'bg-gradient-dark', 'bg-pattern-dots', 'bg-pattern-lines');
+    }
+    
+    // Adiciona event listeners para os botões de background
+    bgButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const bgClass = button.getAttribute('data-bg');
+            removeBackgroundClasses();
+            body.classList.add(bgClass);
+            
+            // Salva a preferência do usuário no localStorage
+            localStorage.setItem('preferredBackground', bgClass);
+            
+            // Atualiza a aparência dos botões
+            bgButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        });
+    });
+    
+    // Carrega a preferência de background salva, se existir
+    const savedBackground = localStorage.getItem('preferredBackground');
+    if (savedBackground) {
+        removeBackgroundClasses();
+        body.classList.add(savedBackground);
+        
+        // Marca o botão correspondente como ativo
+        const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
+})
