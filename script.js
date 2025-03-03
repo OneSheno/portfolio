@@ -45,36 +45,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log("Iniciando busca de perfil do Discord...");
     
-    // Função para buscar dados do Discord via REST API
-    function fetchDiscordProfile() {
-        console.log("Buscando perfil via REST API...");
-        
-        fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
-            .then(response => {
-                console.log("Status da resposta:", response.status);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("Dados completos recebidos:", data);
-                
-                if (data.success) {
-                    updateDiscordProfile(data.data);
-                } else {
-                    console.error("API retornou resposta sem sucesso");
-                    fallbackDiscordInfo();
-                }
-            })
-            .catch(error => {
-                console.error('Erro ao buscar perfil do Discord:', error);
-                fallbackDiscordInfo();
-            });
-    }
-    
+    // Obfuscated updateDiscordProfile function
     function updateDiscordProfile(userData) {
-        console.log("Atualizando perfil com dados:", userData);
+        const _0x3b7c = btoa(JSON.stringify(userData));
+        console.log("Updating profile with encrypted data:", _0x3b7c);
         
         // Update avatar
         const avatarElement = document.getElementById('discord-avatar');
@@ -159,6 +133,65 @@ document.addEventListener('DOMContentLoaded', function() {
             statusElement.innerHTML = '<i class="fas fa-circle" style="color: #747f8d;"></i> Offline';
         }
     }
+    
+    // Função para buscar dados do Discord via REST API
+    function fetchDiscordProfile() {
+        console.log("Buscando perfil via REST API...");
+        
+        fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
+            .then(response => {
+                console.log("Status da resposta:", response.status);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Dados completos recebidos:", data);
+                
+                if (data.success) {
+                    updateDiscordProfile(data.data);
+                } else {
+                    console.error("API retornou resposta sem sucesso");
+                    fallbackDiscordInfo();
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao buscar perfil do Discord:', error);
+                fallbackDiscordInfo();
+            });
+    }
+    
+    // Basic anti-debugging protection
+    const antiDebug = setInterval(() => {
+        const startTime = performance.now();
+        debugger;
+        const endTime = performance.now();
+        if (endTime - startTime > 100) {
+            window.location.href = 'about:blank';
+        }
+    }, 1000);
+
+    // Anti-DevTools protection
+    window.addEventListener('devtoolschange', function(e) {
+        if (e.detail.open) {
+            window.location.href = 'about:blank';
+        }
+    });
+
+    // Disable right-click
+    document.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        return false;
+    });
+
+    // Disable keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        if ((e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73)) || e.keyCode === 123) {
+            e.preventDefault();
+            return false;
+        }
+    });
     
     // Buscar perfil imediatamente
     fetchDiscordProfile();
