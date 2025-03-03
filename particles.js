@@ -3,10 +3,10 @@ class Particle {
         this.canvas = canvas;
         this.x = Math.random() * canvas.width;
         this.y = Math.random() * canvas.height;
-        this.size = Math.random() * 3 + 1;
-        this.speedX = Math.random() * 3 - 1.5;
-        this.speedY = Math.random() * 3 - 1.5;
-        this.color = `rgba(255, 255, 255, ${Math.random() * 0.5})`;
+        this.size = Math.random() * 2 + 2;
+        this.speedX = Math.random() * 2 - 1;
+        this.speedY = Math.random() * 2 - 1;
+        this.color = `rgba(255, 255, 255, ${Math.random() * 0.3 + 0.4})`;
     }
 
     update() {
@@ -35,7 +35,7 @@ class ParticleAnimation {
         
         this.ctx = this.canvas.getContext('2d');
         this.particles = [];
-        this.particleCount = 50;
+        this.particleCount = 100;
         
         this.resize();
         window.addEventListener('resize', () => this.resize());
@@ -57,7 +57,8 @@ class ParticleAnimation {
     }
     
     animate() {
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        this.ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
         
         this.particles.forEach(particle => {
             particle.update();
