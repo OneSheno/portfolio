@@ -6,7 +6,9 @@
 
 body {
     font-family: 'Arial', sans-serif;
-    background: #1a1a1a;
+    background: linear-gradient(135deg, #121212, #1a1a1a);
+    background-size: cover;
+    background-attachment: fixed;
     color: white;
     line-height: 1.6;
     min-height: 100vh;
@@ -19,11 +21,19 @@ body {
     max-width: 680px;
     width: 100%;
     padding: 20px;
+    position: relative;
+    z-index: 1;
 }
 
 .profile {
     text-align: center;
     margin-bottom: 35px;
+    background: rgba(34, 34, 34, 0.7);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .profile-pic {
@@ -49,21 +59,16 @@ body {
     font-style: italic;
 }
 .discord-profile {
-    background: #2c2f33;
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 25px;
-    display: flex;
-    align-items: center;
-    border: 1px solid #5865F2;
-}
-.discord-profile {
     display: flex;
     align-items: center;
     padding: 15px;
-    background-color: #2c2f33;
+    background: linear-gradient(to right, #2c2f33, #23272A);
+    background-size: 200% 200%;
+    animation: gradientAnimation 10s ease infinite;
     border-radius: 10px;
     margin-bottom: 20px;
+    border: 1px solid #5865F2;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 .discord-avatar {
@@ -113,11 +118,13 @@ body {
     margin-left: 5px;
 }
 .music-player {
-    background: #222;
+    background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20"><rect width="20" height="20" fill="%23222"/><circle cx="10" cy="10" r="1" fill="%23333"/></svg>');
+    background-color: #222;
     border-radius: 10px;
     padding: 15px;
     margin-bottom: 25px;
     border: 1px solid #333;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 .music-player-header {
     display: flex;
@@ -187,7 +194,7 @@ body {
     gap: 16px;
 }
 .link-card {
-    background: #222;
+    background: linear-gradient(45deg, #222, #2a2a2a);
     padding: 16px;
     border-radius: 8px;
     text-decoration: none;
@@ -196,10 +203,13 @@ body {
     align-items: center;
     transition: all 0.3s ease;
     border: 1px solid #333;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 .link-card:hover {
-    background: #333;
+    background: linear-gradient(45deg, #333, #3a3a3a);
     transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    border-color: #444;
 }
 .link-card i {
     font-size: 20px;
@@ -215,4 +225,35 @@ body {
     .link-card {
         padding: 14px;
     }
+}
+
+/* Custom Background Animations */
+@keyframes gradientAnimation {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+/* Custom Background Classes */
+.bg-gradient-purple {
+    background: linear-gradient(135deg, #8A2BE2, #4B0082) !important;
+}
+
+.bg-gradient-blue {
+    background: linear-gradient(135deg, #1E90FF, #000080) !important;
+}
+
+.bg-gradient-dark {
+    background: linear-gradient(135deg, #2C3E50, #000000) !important;
+}
+
+.bg-pattern-dots {
+    background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
+}
+
+.bg-pattern-lines {
+    background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                      linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
+    background-size: 20px 20px !important;
 }
