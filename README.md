@@ -1,1 +1,1 @@
-blablabla feito por inteiramente por IA 99.9%
+blablabla feito inteiramente por IA 99.9%
