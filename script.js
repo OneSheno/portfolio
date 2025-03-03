@@ -124,6 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Atualizar a cada 60 segundos
     setInterval(fetchDiscordProfile, 60000);
+    
     // Music Player code
     const audioPlayer = document.getElementById('audio-player');
     const playButton = document.getElementById('play');
@@ -169,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error("Erro ao reproduzir áudio:", error);
         });
     }
+    
     function pauseSong() {
         isPlaying = false;
         playButton.innerHTML = '<i class="fas fa-play"></i>';
@@ -286,6 +288,13 @@ document.addEventListener('DOMContentLoaded', function() {
             // Mostra ou esconde partículas baseado na seleção
             toggleParticles(bgClass === 'bg-particles');
             
+            // Limpa o background padrão quando selecionar padrões específicos
+            if (bgClass === 'bg-pattern-dots' || bgClass === 'bg-pattern-lines' || bgClass === 'bg-particles') {
+                body.style.background = 'rgba(18, 18, 18, 1)';
+            } else {
+                body.style.background = '';
+            }
+            
             // Salva a preferência do usuário no localStorage
             localStorage.setItem('preferredBackground', bgClass);
             
@@ -304,17 +313,12 @@ document.addEventListener('DOMContentLoaded', function() {
         // Mostra ou esconde partículas baseado na seleção salva
         toggleParticles(savedBackground === 'bg-particles');
         
-        // Marca o botão correspondente como ativo
-        const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
-        if (activeButton) {
-            activeButton.classList.add('active');
+        // Limpa o background padrão quando selecionar padrões específicos
+        if (savedBackground === 'bg-pattern-dots' || savedBackground === 'bg-pattern-lines' || savedBackground === 'bg-particles') {
+            body.style.background = 'rgba(18, 18, 18, 1)';
+        } else {
+            body.style.background = '';
         }
-    }
-        removeBackgroundClasses();
-        body.classList.add(savedBackground);
-        
-        // Mostra ou esconde partículas baseado na seleção salva
-        toggleParticles(savedBackground === 'bg-particles');
         
         // Marca o botão correspondente como ativo
         const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
@@ -322,4 +326,4 @@ document.addEventListener('DOMContentLoaded', function() {
             activeButton.classList.add('active');
         }
     }
-)
+});
