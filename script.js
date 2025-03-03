@@ -1,4 +1,21 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Title animation
+    const titles = ['Shennon the Coder', 'Shennon the Skidder'];
+    let currentTitleIndex = 0;
+    const titleElement = document.querySelector('.profile h1');
+
+    function animateTitle() {
+        currentTitleIndex = (currentTitleIndex + 1) % titles.length;
+        titleElement.style.opacity = '0';
+        
+        setTimeout(() => {
+            titleElement.textContent = titles[currentTitleIndex];
+            titleElement.style.opacity = '1';
+        }, 500);
+    }
+
+    setInterval(animateTitle, 3000);
+
     // Discord user information
     const discordUserId = '1154576298803466290';
     
