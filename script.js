@@ -1,15 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Title animation
     const titles = ['Shennon the Coder', 'Shennon the Skidder'];
+    const tabTitles = [
+        'Shennon | Die',
+        'Shennon | ZedPlayer',
+        'Shennon | Skidder Pro',
+        'Shennon | Reverse Engineering',
+    ];
     let currentTitleIndex = 0;
+    let currentTabTitleIndex = 0;
     const titleElement = document.querySelector('.profile h1');
 
     function animateTitle() {
         currentTitleIndex = (currentTitleIndex + 1) % titles.length;
+        currentTabTitleIndex = Math.floor(Math.random() * tabTitles.length);
         titleElement.style.opacity = '0';
         
         setTimeout(() => {
             titleElement.textContent = titles[currentTitleIndex];
+            document.title = tabTitles[currentTabTitleIndex];
             titleElement.style.opacity = '1';
         }, 500);
     }
