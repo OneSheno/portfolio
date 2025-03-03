@@ -1,4 +1,19 @@
 document.addEventListener('DOMContentLoaded', function() {
+    // Contador de visualizações
+    const viewCounter = document.getElementById('view-counter');
+    
+    // Recupera o contador do localStorage ou inicia com 0
+    let viewCount = localStorage.getItem('profileViews') || 0;
+    
+    // Incrementa o contador a cada visita
+    viewCount = parseInt(viewCount) + 1;
+    
+    // Atualiza o contador na página
+    viewCounter.textContent = viewCount;
+    
+    // Salva o novo valor no localStorage
+    localStorage.setItem('profileViews', viewCount);
+    
     // Title animation
     const titles = ['Shennon the Coder', 'Shennon the Skidder'];
     const tabTitles = [
@@ -23,7 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 500);
     }
 
-    setInterval(animateTitle, 2000);
+    setInterval(animateTitle, 3000);
 
     // Discord user information
     const discordUserId = '1154576298803466290';
