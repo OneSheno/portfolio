@@ -1,110 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Contador de visualizações
-    const viewCounter = document.getElementById('view-counter');
-    
-    // Função para atualizar o contador na página
-    function updateViewCounter(count) {
-        viewCounter.textContent = count;
-        console.log('Contador atualizado para:', count);
-    }
-    
-    // Função para gerar uma impressão digital do navegador
-    function generateBrowserFingerprint() {
-        // Combinação de informações disponíveis para identificar o navegador
-        const userAgent = navigator.userAgent;
-        const language = navigator.language;
-        const screenWidth = window.screen.width;
-        const screenHeight = window.screen.height;
-        const colorDepth = window.screen.colorDepth;
-        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        
-        // Combinando esses valores para criar uma impressão digital
-        const fingerprint = `${userAgent}|${language}|${screenWidth}x${screenHeight}|${colorDepth}|${timezone}`;
-        
-        // Criando um hash baseado na impressão digital
-        let hash = 0;
-        for (let i = 0; i < fingerprint.length; i++) {
-            const char = fingerprint.charCodeAt(i);
-            hash = ((hash << 5) - hash) + char;
-            hash = hash & hash; // Convert to 32bit integer
-        }
-        
-        return 'browser_' + Math.abs(hash).toString(16);
-    }
-    
-    // Obtém a lista de navegadores que já visitaram
-    let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
-    
-    // Gera uma impressão digital do navegador atual
-    const browserFingerprint = generateBrowserFingerprint();
-    
-    // Verifica se este navegador já foi contado
-    const isNewBrowser = !visitedBrowsers.includes(browserFingerprint);
-    
-    console.log('Novo navegador?', isNewBrowser ? 'SIM' : 'NÃO');
-    
-    // Namespace único para o contador
-    const namespace = 'shennonportfolio';
-    const key = 'visits';
-    
-    // API para incrementar (hit) ou apenas obter (get) o valor
-    const countApiUrl = isNewBrowser 
-        ? `https://api.countapi.xyz/hit/${namespace}/${key}` // Incrementa se for novo navegador
-        : `https://api.countapi.xyz/get/${namespace}/${key}`; // Apenas obtém o valor se já visitou
-    
-    // Busca o valor atual do contador
-    fetch(countApiUrl)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Erro na API de contagem: ' + response.status);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Resposta da API de contagem:', data);
-            
-            // Atualiza o contador na página
-            if (data && data.value !== undefined) {
-                updateViewCounter(data.value);
-                
-                // Se for um novo navegador, adiciona à lista de visitantes
-                if (isNewBrowser) {
-                    visitedBrowsers.push(browserFingerprint);
-                    localStorage.setItem('visitedBrowsers', JSON.stringify(visitedBrowsers));
-                    console.log('Nova visualização contabilizada!', browserFingerprint);
-                }
-            } else {
-                console.error('Formato de resposta inesperado da API:', data);
-                updateViewCounter(0);
-            }
-        })
-        .catch(error => {
-            console.error('Erro ao obter contagem:', error);
-            // Inicializa o contador como último recurso
-            fetch(`https://api.countapi.xyz/create?namespace=${namespace}&key=${key}&value=1`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Contador criado com valor inicial:', data);
-                    updateViewCounter(data.value || 1);
-                })
-                .catch(e => {
-                    console.error('Não foi possível inicializar o contador:', e);
-                    updateViewCounter(1);
-                });
-        });
-    
-    // Função para gerar um ID único para o visitante (usado por outras funcionalidades)
-    function generateVisitorId() {
-        return 'visitor_' + Math.random().toString(36).substr(2, 9);
-    }
-    
-    // Verifica se o visitante já tem um ID
-    let visitorId = localStorage.getItem('visitorId');
-    if (!visitorId) {
-        visitorId = generateVisitorId();
-        localStorage.setItem('visitorId', visitorId);
-    }
-    
     // Title animation
     const titles = ['Shennon the Coder', 'Shennon the Skidder'];
     const tabTitles = [
@@ -130,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     setInterval(animateTitle, 3000);
-
+    
     // Discord user information
     const discordUserId = '1154576298803466290'; // ID do usuário do Discord
     
