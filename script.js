@@ -2,6 +2,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Contador de visualizações
     const viewCounter = document.getElementById('view-counter');
     
+    // Função para gerar uma impressão digital do navegador
+    function generateBrowserFingerprint() {
+        // Combinação de informações disponíveis para identificar o navegador
+        const userAgent = navigator.userAgent;
+        const language = navigator.language;
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const colorDepth = window.screen.colorDepth;
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        
+        // Combinando esses valores para criar uma impressão digital
+        const fingerprint = `${userAgent}|${language}|${screenWidth}x${screenHeight}|${colorDepth}|${timezone}`;
+        
+        // Criando um hash baseado na impressão digital
+        let hash = 0;
+        for (let i = 0; i < fingerprint.length; i++) {
+            const char = fingerprint.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32bit integer
+        }
+        
+        return 'browser_' + Math.abs(hash).toString(16);
+    }
+    
+    // Obtém ou cria a impressão digital do navegador
+    const browserFingerprint = generateBrowserFingerprint();
+    
+    // Obtém a lista de navegadores que já visitaram
+    let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
+    
+    // Verifica se este navegador já foi contado
+    if (!visitedBrowsers.includes(browserFingerprint)) {
+        // Ainda não contou view para este navegador
+        
+        // Recupera o contador do localStorage
+        let viewCount = localStorage.getItem('profileViews') || 0;
+        viewCount = parseInt(viewCount);
+        
+        // Incrementa contador
+        viewCount += 1;
+        
+        // Salva no localStorage
+        localStorage.setItem('profileViews', viewCount);
+        
+        // Adiciona este navegador à lista de navegadores visitados
+        visitedBrowsers.push(browserFingerprint);
+        localStorage.setItem('visitedBrowsers', JSON.stringify(visitedBrowsers));
+        
+        console.log('Nova visualização contabilizada!', browserFingerprint);
+    } else {
+        console.log('Visualização já foi contabilizada para este navegador.', browserFingerprint);
+    }
+    
+    // Atualiza o contador na página
+    let finalViewCount = localStorage.getItem('profileViews') || 0;
+    viewCounter.textContent = finalViewCount;
+    
     // Função para gerar um ID único para o visitante
     function generateVisitorId() {
         return 'visitor_' + Math.random().toString(36).substr(2, 9);
@@ -24,13 +81,10 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Só incrementa se for a primeira visita ou se for um novo dia
     if (lastVisit !== today) {
-        viewCount += 1;
-        localStorage.setItem('profileViews', viewCount);
+        //viewCount += 1;
+        //localStorage.setItem('profileViews', viewCount);
         localStorage.setItem('lastVisit', today);
     }
-    
-    // Atualiza o contador na página
-    viewCounter.textContent = viewCount;
     
     // Title animation
     const titles = ['Shennon the Coder', 'Shennon the Skidder'];
