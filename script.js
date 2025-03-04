@@ -2,7 +2,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Contador de visualizações
     const viewCounter = document.getElementById('view-counter');
     
-    // Função para gerar uma impressão digital do navegador
+    // Função para atualizar o contador na página
+    function updateViewCounter(count) {
+        viewCounter.textContent = count;
+        console.log('Contador atualizado para:', count);
+    }
+    
+    // Obtém a lista de navegadores que já visitaram
+    let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
+    
+    // Gera uma impressão digital do navegador
     function generateBrowserFingerprint() {
         // Combinação de informações disponíveis para identificar o navegador
         const userAgent = navigator.userAgent;
@@ -26,47 +35,71 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'browser_' + Math.abs(hash).toString(16);
     }
     
-    // Obtém ou cria a impressão digital do navegador
     const browserFingerprint = generateBrowserFingerprint();
     
-    // Função para atualizar o contador na página
-    function updateViewCounter(count) {
-        viewCounter.textContent = count;
-    }
+    // Verifica se este navegador já foi contado
+    const isNewBrowser = !visitedBrowsers.includes(browserFingerprint);
     
-    // Função para criptografar dados sensíveis
-    function encrypt(text, salt = "shennonPortfolio") {
-        // Implementação simples de criptografia baseada em XOR
-        let result = '';
-        for (let i = 0; i < text.length; i++) {
-            const charCode = text.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
-            result += String.fromCharCode(charCode);
-        }
-        return btoa(result); // Codifica em base64 para exibição segura
-    }
+    console.log('Novo navegador?', isNewBrowser ? 'SIM' : 'NÃO');
     
-    // Função para descriptografar dados
-    function decrypt(encoded, salt = "shennonPortfolio") {
-        try {
-            const text = atob(encoded); // Decodifica do base64
-            let result = '';
-            for (let i = 0; i < text.length; i++) {
-                const charCode = text.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
-                result += String.fromCharCode(charCode);
+    // Namespace único para o contador - use algo exclusivo para seu site
+    const namespace = 'shennonportfolio';
+    const key = 'visits';
+    
+    // Inicializa o contador se ainda não existir (executar uma vez)
+    // fetch(`https://api.countapi.xyz/create?namespace=${namespace}&key=${key}&value=11`);
+    
+    // API para incrementar (hit) ou apenas obter (get) o valor
+    const countApiUrl = isNewBrowser 
+        ? `https://api.countapi.xyz/hit/${namespace}/${key}` // Incrementa se for novo navegador
+        : `https://api.countapi.xyz/get/${namespace}/${key}`; // Apenas obtém o valor se já visitou
+    
+    // Busca o valor atual do contador
+    fetch(countApiUrl)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro na API de contagem: ' + response.status);
             }
-            return result;
-        } catch (e) {
-            console.error('Erro ao descriptografar:', e);
-            return '';
-        }
-    }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Resposta da API de contagem:', data);
+            
+            // Atualiza o contador na página
+            if (data && data.value !== undefined) {
+                updateViewCounter(data.value);
+                
+                // Se for um novo navegador, adiciona à lista de visitantes
+                if (isNewBrowser) {
+                    visitedBrowsers.push(browserFingerprint);
+                    localStorage.setItem('visitedBrowsers', JSON.stringify(visitedBrowsers));
+                    console.log('Nova visualização contabilizada!', browserFingerprint);
+                }
+            } else {
+                console.error('Formato de resposta inesperado da API:', data);
+                updateViewCounter(0);
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao obter contagem:', error);
+            // Inicializa o contador como último recurso
+            fetch(`https://api.countapi.xyz/create?namespace=${namespace}&key=${key}&value=1`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Contador criado com valor inicial:', data);
+                    updateViewCounter(data.value || 1);
+                })
+                .catch(e => {
+                    console.error('Não foi possível inicializar o contador:', e);
+                    updateViewCounter(1);
+                });
+        });
     
     // Usa o serviço CountAPI para contagem global entre navegadores
     // Este é um serviço gratuito que permite armazenar contadores na web
-    const encryptedApiUrl = encrypt('https://api.countapi.xyz/hit/shennonportfolio/visits');
-    console.log('URL criptografada:', encryptedApiUrl);
+    const apiUrl = 'https://api.countapi.xyz/hit/shennonportfolio/visits';
     
-    fetch(decrypt(encryptedApiUrl))
+    fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             // Atualiza o contador na página com o valor do serviço externo
@@ -147,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(animateTitle, 3000);
 
     // Discord user information
-    const discordUserId = decrypt(encrypt('1154576298803466290')); // ID criptografado e descriptografado em tempo de execução
+    const discordUserId = '1154576298803466290'; // ID do usuário do Discord
     
     console.log("Iniciando busca de perfil do Discord...");
     
@@ -217,40 +250,33 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Obfuscated updateDiscordProfile function
     function updateDiscordProfile(userData) {
-        // Criptografa os dados do usuário antes de processar
-        const _0x3b7c = encrypt(JSON.stringify(userData));
-        console.log("Updating profile with encrypted data:", _0x3b7c);
-        
-        // Processa os dados descriptografando
-        const decryptedData = JSON.parse(decrypt(_0x3b7c));
-        
         // Update avatar
         const avatarElement = document.getElementById('discord-avatar');
-        if (avatarElement && decryptedData.discord_user && decryptedData.discord_user.avatar) {
-            const avatarHash = decryptedData.discord_user.avatar;
+        if (avatarElement && userData.discord_user && userData.discord_user.avatar) {
+            const avatarHash = userData.discord_user.avatar;
             const avatarUrl = `https://cdn.discordapp.com/avatars/${discordUserId}/${avatarHash}?size=128`;
             console.log("Definindo avatar URL:", avatarUrl);
             avatarElement.src = avatarUrl;
         } else {
             console.error("Avatar element not found or no avatar data:", 
-                          {element: !!avatarElement, user: !!decryptedData.discord_user, 
-                           avatar: decryptedData.discord_user?.avatar});
+                          {element: !!avatarElement, user: !!userData.discord_user, 
+                           avatar: userData.discord_user?.avatar});
             if (avatarElement) {
                 avatarElement.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
             }
         }
         // Update username and discriminator
         const nameElement = document.getElementById('discord-name');
-        if (nameElement && decryptedData.discord_user) {
-            nameElement.textContent = decryptedData.discord_user.username || "Shennon";
-            console.log("Nome definido:", decryptedData.discord_user.username);
+        if (nameElement && userData.discord_user) {
+            nameElement.textContent = userData.discord_user.username || "Shennon";
+            console.log("Nome definido:", userData.discord_user.username);
             
             // Update discriminator if it exists
             const discriminatorElement = document.getElementById('discord-discriminator');
             if (discriminatorElement) {
                 // Discord is phasing out discriminators, so check if it exists
-                if (decryptedData.discord_user.discriminator && decryptedData.discord_user.discriminator !== '0') {
-                    discriminatorElement.textContent = `#${decryptedData.discord_user.discriminator}`;
+                if (userData.discord_user.discriminator && userData.discord_user.discriminator !== '0') {
+                    discriminatorElement.textContent = `#${userData.discord_user.discriminator}`;
                 } else {
                     discriminatorElement.textContent = ''; // Remove discriminator if not present
                 }
@@ -260,21 +286,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update status
         const statusContainer = document.querySelector('.discord-status');
         if (statusContainer) {
-            console.log("Status atual:", decryptedData.discord_status);
+            console.log("Status atual:", userData.discord_status);
             
-            if (decryptedData.discord_status === 'online') {
+            if (userData.discord_status === 'online') {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #43b581;"></i> Online';
-            } else if (decryptedData.discord_status === 'idle') {
+            } else if (userData.discord_status === 'idle') {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #faa61a;"></i> Ausente';
-            } else if (decryptedData.discord_status === 'dnd') {
+            } else if (userData.discord_status === 'dnd') {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #f04747;"></i> Não perturbe';
             } else {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #747f8d;"></i> Offline';
             }
             
             // If there's a custom status
-            if (decryptedData.activities && decryptedData.activities.length > 0) {
-                const customStatus = decryptedData.activities.find(activity => activity.type === 4);
+            if (userData.activities && userData.activities.length > 0) {
+                const customStatus = userData.activities.find(activity => activity.type === 4);
                 if (customStatus && customStatus.state) {
                     const statusText = document.createElement('div');
                     statusText.className = 'discord-custom-status';
