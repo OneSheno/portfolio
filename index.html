@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shennon | Links</title>
+    <title>Shennon | Die</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="icon" href="https://i.pinimg.com/474x/e8/99/c4/e899c402060976f7611257f2810e9167.jpg" type="image/jpeg">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* Estilo para ícone da aba mais arredondado */
+        link[rel="icon"] {
+            border-radius: 50%;
+        }
+    </style>
 </head>
-<body>
+<body class="bg-gradient-purple">
     <div class="container">
-        <div class="background-selector">
-            <button class="bg-button" data-bg="bg-gradient-purple">Roxo</button>
-            <button class="bg-button" data-bg="bg-gradient-blue">Azul</button>
-            <button class="bg-button" data-bg="bg-gradient-dark">Escuro</button>
-            <button class="bg-button" data-bg="bg-pattern-dots">Pontos</button>
-            <button class="bg-button" data-bg="bg-pattern-lines">Linhas</button>
-        </div>
         <div class="profile">
-            <img src="profile-picture.jpg" alt="Shennon" class="profile-pic">
-            <h1>@Shennon</h1>
-            <p>Reverse engineering | Skidder Pro | voce é viadokkk</p>
+            <img src="https://i.pinimg.com/474x/e8/99/c4/e899c402060976f7611257f2810e9167.jpg" alt="Shennon" class="profile-pic">
+            <h1>Shennon the Coder</h1>
+            <p>Reverse engineering | Skidder Pro</p>
         </div>
 
         <div class="discord-profile">
@@ -65,26 +65,27 @@
         </div>
 
         <div class="links">
-            <a href="#" class="link-card">
+            <a href="https://github.com/OneSheno" target="_blank" class="link-card">
                 <i class="fab fa-github"></i>
                 <span>GitHub</span>
             </a>
-            <a href="#" class="link-card">
+            <a href="#" class="link-card" id="add-discord">
                 <i class="fab fa-discord"></i>
-                <span>Discord Server</span>
-            </a>
-            <a href="#" class="link-card">
-                <i class="fab fa-youtube"></i>
-                <span>YouTube Channel</span>
-            </a>
-            <a href="#" class="link-card">
-                <i class="fab fa-telegram"></i>
-                <span>Telegram</span>
+                <span>Me adicionar</span>
             </a>
             <a href="#" class="link-card">
                 <i class="fas fa-code"></i>
                 <span>My Projects</span>
             </a>
+        </div>
+        
+        <div class="background-selector">
+            <button class="bg-button active" data-bg="bg-gradient-purple">Roxo</button>
+            <button class="bg-button" data-bg="bg-gradient-blue">Azul</button>
+            <button class="bg-button" data-bg="bg-gradient-dark">Escuro</button>
+            <button class="bg-button" data-bg="bg-pattern-dots">Pontos</button>
+            <button class="bg-button" data-bg="bg-pattern-lines">Linhas</button>
+            <button class="bg-button" data-bg="bg-particles">Partículas</button>
         </div>
     </div>
 
