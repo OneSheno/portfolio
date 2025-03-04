@@ -8,10 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log('Contador atualizado para:', count);
     }
     
-    // Obtém a lista de navegadores que já visitaram
-    let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
-    
-    // Gera uma impressão digital do navegador
+    // Função para gerar uma impressão digital do navegador
     function generateBrowserFingerprint() {
         // Combinação de informações disponíveis para identificar o navegador
         const userAgent = navigator.userAgent;
@@ -35,6 +32,10 @@ document.addEventListener('DOMContentLoaded', function() {
         return 'browser_' + Math.abs(hash).toString(16);
     }
     
+    // Obtém a lista de navegadores que já visitaram
+    let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
+    
+    // Gera uma impressão digital do navegador atual
     const browserFingerprint = generateBrowserFingerprint();
     
     // Verifica se este navegador já foi contado
@@ -42,12 +43,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     console.log('Novo navegador?', isNewBrowser ? 'SIM' : 'NÃO');
     
-    // Namespace único para o contador - use algo exclusivo para seu site
+    // Namespace único para o contador
     const namespace = 'shennonportfolio';
     const key = 'visits';
-    
-    // Inicializa o contador se ainda não existir (executar uma vez)
-    // fetch(`https://api.countapi.xyz/create?namespace=${namespace}&key=${key}&value=11`);
     
     // API para incrementar (hit) ou apenas obter (get) o valor
     const countApiUrl = isNewBrowser 
@@ -95,38 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
         });
     
-    // Usa o serviço CountAPI para contagem global entre navegadores
-    // Este é um serviço gratuito que permite armazenar contadores na web
-    const apiUrl = 'https://api.countapi.xyz/hit/shennonportfolio/visits';
-    
-    fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => {
-            // Atualiza o contador na página com o valor do serviço externo
-            updateViewCounter(data.value);
-            console.log('Contagem atual:', data.value);
-        })
-        .catch(error => {
-            console.error('Erro ao obter contagem:', error);
-            // Fallback para o localStorage
-            updateViewCounter(localStorage.getItem('viewCount') || 0);
-        });
-    
-    // Obtém a lista de navegadores que já visitaram
-    let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
-    
-    // Verifica se este navegador já foi contado
-    if (!visitedBrowsers.includes(browserFingerprint)) {
-        // Adiciona este navegador à lista de navegadores visitados
-        visitedBrowsers.push(browserFingerprint);
-        localStorage.setItem('visitedBrowsers', JSON.stringify(visitedBrowsers));
-        
-        console.log('Nova visualização contabilizada!', browserFingerprint);
-    } else {
-        console.log('Visualização já foi contabilizada para este navegador.', browserFingerprint);
-    }
-    
-    // Função para gerar um ID único para o visitante
+    // Função para gerar um ID único para o visitante (usado por outras funcionalidades)
     function generateVisitorId() {
         return 'visitor_' + Math.random().toString(36).substr(2, 9);
     }
@@ -136,21 +103,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (!visitorId) {
         visitorId = generateVisitorId();
         localStorage.setItem('visitorId', visitorId);
-    }
-    
-    // Verifica se já contou a visita hoje
-    const today = new Date().toDateString();
-    const lastVisit = localStorage.getItem('lastVisit');
-    
-    // Recupera o contador do localStorage ou inicia com 0
-    let viewCount = localStorage.getItem('profileViews') || 0;
-    viewCount = parseInt(viewCount);
-    
-    // Só incrementa se for a primeira visita ou se for um novo dia
-    if (lastVisit !== today) {
-        //viewCount += 1;
-        //localStorage.setItem('profileViews', viewCount);
-        localStorage.setItem('lastVisit', today);
     }
     
     // Title animation
@@ -248,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.head.appendChild(style);
     }
     
-    // Obfuscated updateDiscordProfile function
+    // Função para atualização do perfil do Discord
     function updateDiscordProfile(userData) {
         // Update avatar
         const avatarElement = document.getElementById('discord-avatar');
@@ -317,287 +269,40 @@ document.addEventListener('DOMContentLoaded', function() {
     // Fallback function for Discord info
     function fallbackDiscordInfo() {
         console.log("Usando informações de fallback");
-        
-        const avatarElement = document.getElementById('discord-avatar');
-        if (avatarElement) {
-            avatarElement.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
-        }
-        
-        const nameElement = document.getElementById('discord-name');
-        if (nameElement) {
-            nameElement.textContent = 'Shennon';
-        }
-        
-        const statusElement = document.querySelector('.discord-status');
-        if (statusElement) {
-            statusElement.innerHTML = '<i class="fas fa-circle" style="color: #747f8d;"></i> Offline';
-        }
+        const fallbackData = {
+            discord_user: {
+                username: "Shennon",
+                discriminator: "0000",
+                avatar: null
+            },
+            discord_status: "offline",
+            activities: []
+        };
+        updateDiscordProfile(fallbackData);
     }
     
     // Função para buscar dados do Discord via REST API
     function fetchDiscordProfile() {
-        console.log("Buscando perfil via REST API...");
+        console.log("Buscando perfil do Discord...");
         
-        fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
+        // Tenta buscar os dados do servidor
+        fetch('/api/discord-profile?user_id=' + discordUserId)
             .then(response => {
-                console.log("Status da resposta:", response.status);
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    throw new Error('Falha ao buscar dados do Discord, status: ' + response.status);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Dados completos recebidos:", data);
-                
-                if (data.success) {
-                    updateDiscordProfile(data.data);
-                } else {
-                    console.error("API retornou resposta sem sucesso");
-                    fallbackDiscordInfo();
-                }
+                console.log("Dados do Discord recebidos:", data);
+                updateDiscordProfile(data);
             })
             .catch(error => {
-                console.error('Erro ao buscar perfil do Discord:', error);
+                console.error("Erro ao buscar perfil do Discord:", error);
                 fallbackDiscordInfo();
             });
     }
     
-    // Basic anti-debugging protection
-    const antiDebug = setInterval(() => {
-        const startTime = performance.now();
-        debugger;
-        const endTime = performance.now();
-        if (endTime - startTime > 100) {
-            window.location.href = 'about:blank';
-        }
-    }, 1000);
-
-    // Anti-DevTools protection
-    window.addEventListener('devtoolschange', function(e) {
-        if (e.detail.open) {
-            window.location.href = 'about:blank';
-        }
-    });
-
-    // Disable right-click
-    document.addEventListener('contextmenu', function(e) {
-        e.preventDefault();
-        return false;
-    });
-
-    // Disable keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83 || e.keyCode === 73)) || e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
-    });
-    
     // Buscar perfil imediatamente
     fetchDiscordProfile();
-    
-    // Atualizar a cada 60 segundos
-    setInterval(fetchDiscordProfile, 60000);
-    
-    // Music Player code
-    const audioPlayer = document.getElementById('audio-player');
-    const playButton = document.getElementById('play');
-    const prevButton = document.getElementById('prev');
-    const nextButton = document.getElementById('next');
-    const volumeButton = document.getElementById('volume');
-    const progressBar = document.querySelector('.progress-bar');
-    const progressContainer = document.querySelector('.progress-container');
-    const currentTimeElement = document.getElementById('current-time');
-    const durationElement = document.getElementById('duration');
-    const songTitleElement = document.getElementById('song-title');
-    const songArtistElement = document.getElementById('song-artist');
-    const songCoverElement = document.getElementById('song-cover');
-    
-    // List of songs - using GitHub repository URLs
-    const songs = [
-        {
-            title: "Your Betrayal",
-            artist: "Bullet For My Valentine",
-            src: "./music/Bullet For My Valentine - Your Betrayal (Official Video) - bulletvalentineVEVO.mp3",
-            cover: "https://i.ytimg.com/vi/IHgFJEJgUrg/maxresdefault.jpg"
-        }
-    ];
-    
-    let currentSongIndex = 0;
-    let isPlaying = false;
-    
-    // Load the first song
-    loadSong(songs[currentSongIndex]);
-    
-    function loadSong(song) {
-        songTitleElement.textContent = song.title;
-        songArtistElement.textContent = song.artist;
-        songCoverElement.src = song.cover;
-        audioPlayer.src = song.src;
-        audioPlayer.load();
-    }
-    
-    function playSong() {
-        isPlaying = true;
-        playButton.innerHTML = '<i class="fas fa-pause"></i>';
-        audioPlayer.play().catch(error => {
-            console.error("Erro ao reproduzir áudio:", error);
-        });
-    }
-    
-    function pauseSong() {
-        isPlaying = false;
-        playButton.innerHTML = '<i class="fas fa-play"></i>';
-        audioPlayer.pause();
-    }
-    
-    // Event Listeners
-    playButton.addEventListener('click', () => {
-        if (isPlaying) {
-            pauseSong();
-        } else {
-            playSong();
-        }
-    });
-    
-    prevButton.addEventListener('click', () => {
-        currentSongIndex--;
-        if (currentSongIndex < 0) {
-            currentSongIndex = songs.length - 1;
-        }
-        loadSong(songs[currentSongIndex]);
-        if (isPlaying) playSong();
-    });
-    
-    nextButton.addEventListener('click', () => {
-        currentSongIndex++;
-        if (currentSongIndex >= songs.length) {
-            currentSongIndex = 0;
-        }
-        loadSong(songs[currentSongIndex]);
-        if (isPlaying) playSong();
-    });
-    
-    // Progress bar update
-    audioPlayer.addEventListener('timeupdate', () => {
-        const { duration, currentTime } = audioPlayer;
-        const progressPercent = (currentTime / duration) * 100;
-        progressBar.style.width = `${progressPercent}%`;
-        
-        // Update time displays
-        const currentMinutes = Math.floor(currentTime / 60);
-        const currentSeconds = Math.floor(currentTime % 60);
-        currentTimeElement.textContent = `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')}`;
-        
-        if (!isNaN(duration)) {
-            const totalMinutes = Math.floor(duration / 60);
-            const totalSeconds = Math.floor(duration % 60);
-            durationElement.textContent = `${totalMinutes}:${totalSeconds.toString().padStart(2, '0')}`;
-        }
-    });
-    
-    // Click on progress bar
-    progressContainer.addEventListener('click', (e) => {
-        const width = progressContainer.clientWidth;
-        const clickX = e.offsetX;
-        const duration = audioPlayer.duration;
-        audioPlayer.currentTime = (clickX / width) * duration;
-    });
-    
-    // Volume control
-    let isMuted = false;
-    volumeButton.addEventListener('click', () => {
-        if (isMuted) {
-            audioPlayer.volume = 1;
-            volumeButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-            isMuted = false;
-        } else {
-            audioPlayer.volume = 0;
-            volumeButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
-            isMuted = true;
-        }
-    });
-    
-    // Auto-play next song
-    audioPlayer.addEventListener('ended', () => {
-        nextButton.click();
-    });
-    
-    // Background selector functionality
-    const bgButtons = document.querySelectorAll('.bg-button');
-    const body = document.body;
-    let particleInstance = null;
-    
-    // Adiciona botão para partículas animadas
-    const backgroundSelector = document.querySelector('.background-selector');
-    const particleButton = document.createElement('button');
-    particleButton.className = 'bg-button';
-    particleButton.setAttribute('data-bg', 'bg-particles');
-    particleButton.textContent = 'Partículas';
-    backgroundSelector.appendChild(particleButton);
-    
-    // Remove todas as classes de background
-    function removeBackgroundClasses() {
-        body.classList.remove('bg-gradient-purple', 'bg-gradient-blue', 'bg-gradient-dark', 'bg-pattern-dots', 'bg-pattern-lines', 'bg-particles');
-    }
-    
-    // Função para mostrar ou esconder o canvas de partículas
-    function toggleParticles(show) {
-        const canvas = document.querySelector('.particle-background');
-        if (canvas) {
-            canvas.style.display = show ? 'block' : 'none';
-        }
-    }
-    
-    // Inicialmente esconde as partículas
-    toggleParticles(false);
-    
-    // Adiciona event listeners para os botões de background
-    bgButtons.forEach(button => {
-        button.addEventListener('click', () => {
-            const bgClass = button.getAttribute('data-bg');
-            removeBackgroundClasses();
-            body.classList.add(bgClass);
-            
-            // Mostra ou esconde partículas baseado na seleção
-            toggleParticles(bgClass === 'bg-particles');
-            
-            // Limpa o background padrão quando selecionar padrões específicos
-            if (bgClass === 'bg-pattern-dots' || bgClass === 'bg-pattern-lines' || bgClass === 'bg-particles') {
-                body.style.background = 'rgba(18, 18, 18, 1)';
-            } else {
-                body.style.background = '';
-            }
-            
-            // Salva a preferência do usuário no localStorage
-            localStorage.setItem('preferredBackground', bgClass);
-            
-            // Atualiza a aparência dos botões
-            bgButtons.forEach(btn => btn.classList.remove('active'));
-            button.classList.add('active');
-        });
-    });
-    
-    // Carrega a preferência de background salva, se existir
-    const savedBackground = localStorage.getItem('preferredBackground');
-    if (savedBackground) {
-        removeBackgroundClasses();
-        body.classList.add(savedBackground);
-        
-        // Mostra ou esconde partículas baseado na seleção salva
-        toggleParticles(savedBackground === 'bg-particles');
-        
-        // Limpa o background padrão quando selecionar padrões específicos
-        if (savedBackground === 'bg-pattern-dots' || savedBackground === 'bg-pattern-lines' || savedBackground === 'bg-particles') {
-            body.style.background = 'rgba(18, 18, 18, 1)';
-        } else {
-            body.style.background = '';
-        }
-        
-        // Marca o botão correspondente como ativo
-        const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
-        if (activeButton) {
-            activeButton.classList.add('active');
-        }
-    }
 });
