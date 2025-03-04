@@ -29,23 +29,61 @@ document.addEventListener('DOMContentLoaded', function() {
     // Obtém ou cria a impressão digital do navegador
     const browserFingerprint = generateBrowserFingerprint();
     
+    // Função para atualizar o contador na página
+    function updateViewCounter(count) {
+        viewCounter.textContent = count;
+    }
+    
+    // Função para criptografar dados sensíveis
+    function encrypt(text, salt = "shennonPortfolio") {
+        // Implementação simples de criptografia baseada em XOR
+        let result = '';
+        for (let i = 0; i < text.length; i++) {
+            const charCode = text.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
+            result += String.fromCharCode(charCode);
+        }
+        return btoa(result); // Codifica em base64 para exibição segura
+    }
+    
+    // Função para descriptografar dados
+    function decrypt(encoded, salt = "shennonPortfolio") {
+        try {
+            const text = atob(encoded); // Decodifica do base64
+            let result = '';
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i) ^ salt.charCodeAt(i % salt.length);
+                result += String.fromCharCode(charCode);
+            }
+            return result;
+        } catch (e) {
+            console.error('Erro ao descriptografar:', e);
+            return '';
+        }
+    }
+    
+    // Usa o serviço CountAPI para contagem global entre navegadores
+    // Este é um serviço gratuito que permite armazenar contadores na web
+    const encryptedApiUrl = encrypt('https://api.countapi.xyz/hit/shennonportfolio/visits');
+    console.log('URL criptografada:', encryptedApiUrl);
+    
+    fetch(decrypt(encryptedApiUrl))
+        .then(response => response.json())
+        .then(data => {
+            // Atualiza o contador na página com o valor do serviço externo
+            updateViewCounter(data.value);
+            console.log('Contagem atual:', data.value);
+        })
+        .catch(error => {
+            console.error('Erro ao obter contagem:', error);
+            // Fallback para o localStorage
+            updateViewCounter(localStorage.getItem('viewCount') || 0);
+        });
+    
     // Obtém a lista de navegadores que já visitaram
     let visitedBrowsers = JSON.parse(localStorage.getItem('visitedBrowsers') || '[]');
     
     // Verifica se este navegador já foi contado
     if (!visitedBrowsers.includes(browserFingerprint)) {
-        // Ainda não contou view para este navegador
-        
-        // Recupera o contador do localStorage
-        let viewCount = localStorage.getItem('profileViews') || 0;
-        viewCount = parseInt(viewCount);
-        
-        // Incrementa contador
-        viewCount += 1;
-        
-        // Salva no localStorage
-        localStorage.setItem('profileViews', viewCount);
-        
         // Adiciona este navegador à lista de navegadores visitados
         visitedBrowsers.push(browserFingerprint);
         localStorage.setItem('visitedBrowsers', JSON.stringify(visitedBrowsers));
@@ -54,10 +92,6 @@ document.addEventListener('DOMContentLoaded', function() {
     } else {
         console.log('Visualização já foi contabilizada para este navegador.', browserFingerprint);
     }
-    
-    // Atualiza o contador na página
-    let finalViewCount = localStorage.getItem('profileViews') || 0;
-    viewCounter.textContent = finalViewCount;
     
     // Função para gerar um ID único para o visitante
     function generateVisitorId() {
@@ -113,7 +147,7 @@ document.addEventListener('DOMContentLoaded', function() {
     setInterval(animateTitle, 3000);
 
     // Discord user information
-    const discordUserId = '1154576298803466290';
+    const discordUserId = decrypt(encrypt('1154576298803466290')); // ID criptografado e descriptografado em tempo de execução
     
     console.log("Iniciando busca de perfil do Discord...");
     
@@ -183,36 +217,40 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Obfuscated updateDiscordProfile function
     function updateDiscordProfile(userData) {
-        const _0x3b7c = btoa(JSON.stringify(userData));
+        // Criptografa os dados do usuário antes de processar
+        const _0x3b7c = encrypt(JSON.stringify(userData));
         console.log("Updating profile with encrypted data:", _0x3b7c);
+        
+        // Processa os dados descriptografando
+        const decryptedData = JSON.parse(decrypt(_0x3b7c));
         
         // Update avatar
         const avatarElement = document.getElementById('discord-avatar');
-        if (avatarElement && userData.discord_user && userData.discord_user.avatar) {
-            const avatarHash = userData.discord_user.avatar;
+        if (avatarElement && decryptedData.discord_user && decryptedData.discord_user.avatar) {
+            const avatarHash = decryptedData.discord_user.avatar;
             const avatarUrl = `https://cdn.discordapp.com/avatars/${discordUserId}/${avatarHash}?size=128`;
             console.log("Definindo avatar URL:", avatarUrl);
             avatarElement.src = avatarUrl;
         } else {
             console.error("Avatar element not found or no avatar data:", 
-                          {element: !!avatarElement, user: !!userData.discord_user, 
-                           avatar: userData.discord_user?.avatar});
+                          {element: !!avatarElement, user: !!decryptedData.discord_user, 
+                           avatar: decryptedData.discord_user?.avatar});
             if (avatarElement) {
                 avatarElement.src = 'https://cdn.discordapp.com/embed/avatars/0.png';
             }
         }
         // Update username and discriminator
         const nameElement = document.getElementById('discord-name');
-        if (nameElement && userData.discord_user) {
-            nameElement.textContent = userData.discord_user.username || "Shennon";
-            console.log("Nome definido:", userData.discord_user.username);
+        if (nameElement && decryptedData.discord_user) {
+            nameElement.textContent = decryptedData.discord_user.username || "Shennon";
+            console.log("Nome definido:", decryptedData.discord_user.username);
             
             // Update discriminator if it exists
             const discriminatorElement = document.getElementById('discord-discriminator');
             if (discriminatorElement) {
                 // Discord is phasing out discriminators, so check if it exists
-                if (userData.discord_user.discriminator && userData.discord_user.discriminator !== '0') {
-                    discriminatorElement.textContent = `#${userData.discord_user.discriminator}`;
+                if (decryptedData.discord_user.discriminator && decryptedData.discord_user.discriminator !== '0') {
+                    discriminatorElement.textContent = `#${decryptedData.discord_user.discriminator}`;
                 } else {
                     discriminatorElement.textContent = ''; // Remove discriminator if not present
                 }
@@ -222,21 +260,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Update status
         const statusContainer = document.querySelector('.discord-status');
         if (statusContainer) {
-            console.log("Status atual:", userData.discord_status);
+            console.log("Status atual:", decryptedData.discord_status);
             
-            if (userData.discord_status === 'online') {
+            if (decryptedData.discord_status === 'online') {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #43b581;"></i> Online';
-            } else if (userData.discord_status === 'idle') {
+            } else if (decryptedData.discord_status === 'idle') {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #faa61a;"></i> Ausente';
-            } else if (userData.discord_status === 'dnd') {
+            } else if (decryptedData.discord_status === 'dnd') {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #f04747;"></i> Não perturbe';
             } else {
                 statusContainer.innerHTML = '<i class="fas fa-circle" style="color: #747f8d;"></i> Offline';
             }
             
             // If there's a custom status
-            if (userData.activities && userData.activities.length > 0) {
-                const customStatus = userData.activities.find(activity => activity.type === 4);
+            if (decryptedData.activities && decryptedData.activities.length > 0) {
+                const customStatus = decryptedData.activities.find(activity => activity.type === 4);
                 if (customStatus && customStatus.state) {
                     const statusText = document.createElement('div');
                     statusText.className = 'discord-custom-status';
