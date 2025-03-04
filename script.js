@@ -175,28 +175,213 @@ document.addEventListener('DOMContentLoaded', function() {
         updateDiscordProfile(fallbackData);
     }
     
-    // Função para buscar dados do Discord via REST API
+    // Função para buscar dados do Discord via Lanyard API
     function fetchDiscordProfile() {
-        console.log("Buscando perfil do Discord...");
+        console.log("Buscando perfil via API Lanyard...");
         
-        // Tenta buscar os dados do servidor
-        fetch('/api/discord-profile?user_id=' + discordUserId)
+        fetch(`https://api.lanyard.rest/v1/users/${discordUserId}`)
             .then(response => {
+                console.log("Status da resposta:", response.status);
                 if (!response.ok) {
-                    throw new Error('Falha ao buscar dados do Discord, status: ' + response.status);
+                    throw new Error(`HTTP error! Status: ${response.status}`);
                 }
                 return response.json();
             })
             .then(data => {
-                console.log("Dados do Discord recebidos:", data);
-                updateDiscordProfile(data);
+                console.log("Dados completos recebidos:", data);
+                
+                if (data.success) {
+                    updateDiscordProfile(data.data);
+                } else {
+                    console.error("API retornou resposta sem sucesso");
+                    fallbackDiscordInfo();
+                }
             })
             .catch(error => {
-                console.error("Erro ao buscar perfil do Discord:", error);
+                console.error('Erro ao buscar perfil do Discord:', error);
                 fallbackDiscordInfo();
             });
     }
     
     // Buscar perfil imediatamente
     fetchDiscordProfile();
+    
+    // Atualizar a cada 60 segundos
+    setInterval(fetchDiscordProfile, 60000);
+    
+    // Music Player code
+    const audioPlayer = document.getElementById('audio-player');
+    const playButton = document.getElementById('play');
+    const prevButton = document.getElementById('prev');
+    const nextButton = document.getElementById('next');
+    const volumeButton = document.getElementById('volume');
+    const progressBar = document.querySelector('.progress-bar');
+    const progressContainer = document.querySelector('.progress-container');
+    const currentTimeElement = document.getElementById('current-time');
+    const durationElement = document.getElementById('duration');
+    const songTitleElement = document.getElementById('song-title');
+    const songArtistElement = document.getElementById('song-artist');
+    const songCoverElement = document.getElementById('song-cover');
+    
+    // List of songs - using GitHub repository URLs
+    const songs = [
+        {
+            title: "Your Betrayal",
+            artist: "Bullet For My Valentine",
+            src: "./music/Bullet For My Valentine - Your Betrayal (Official Video) - bulletvalentineVEVO.mp3",
+            cover: "https://i.ytimg.com/vi/IHgFJEJgUrg/maxresdefault.jpg"
+        }
+    ];
+    
+    let currentSongIndex = 0;
+    let isPlaying = false;
+    
+    // Load the first song
+    loadSong(songs[currentSongIndex]);
+    
+    function loadSong(song) {
+        songTitleElement.textContent = song.title;
+        songArtistElement.textContent = song.artist;
+        songCoverElement.src = song.cover;
+        audioPlayer.src = song.src;
+        audioPlayer.load();
+    }
+    
+    function playSong() {
+        isPlaying = true;
+        playButton.innerHTML = '<i class="fas fa-pause"></i>';
+        audioPlayer.play().catch(error => {
+            console.error("Erro ao reproduzir áudio:", error);
+        });
+    }
+    
+    function pauseSong() {
+        isPlaying = false;
+        playButton.innerHTML = '<i class="fas fa-play"></i>';
+        audioPlayer.pause();
+    }
+    
+    // Event Listeners
+    playButton.addEventListener('click', () => {
+        if (isPlaying) {
+            pauseSong();
+        } else {
+            playSong();
+        }
+    });
+    
+    prevButton.addEventListener('click', () => {
+        currentSongIndex--;
+        if (currentSongIndex < 0) {
+            currentSongIndex = songs.length - 1;
+        }
+        loadSong(songs[currentSongIndex]);
+        if (isPlaying) playSong();
+    });
+    
+    nextButton.addEventListener('click', () => {
+        currentSongIndex++;
+        if (currentSongIndex >= songs.length) {
+            currentSongIndex = 0;
+        }
+        loadSong(songs[currentSongIndex]);
+        if (isPlaying) playSong();
+    });
+    
+    // Progress bar update
+    audioPlayer.addEventListener('timeupdate', () => {
+        const { duration, currentTime } = audioPlayer;
+        const progressPercent = (currentTime / duration) * 100;
+        progressBar.style.width = `${progressPercent}%`;
+        
+        // Update time displays
+        const currentMinutes = Math.floor(currentTime / 60);
+        const currentSeconds = Math.floor(currentTime % 60);
+        currentTimeElement.textContent = `${currentMinutes}:${currentSeconds.toString().padStart(2, '0')}`;
+        
+        if (!isNaN(duration)) {
+            const totalMinutes = Math.floor(duration / 60);
+            const totalSeconds = Math.floor(duration % 60);
+            durationElement.textContent = `${totalMinutes}:${totalSeconds.toString().padStart(2, '0')}`;
+        }
+    });
+    
+    // Click on progress bar
+    progressContainer.addEventListener('click', (e) => {
+        const width = progressContainer.clientWidth;
+        const clickX = e.offsetX;
+        const duration = audioPlayer.duration;
+        audioPlayer.currentTime = (clickX / width) * duration;
+    });
+    
+    // Volume control
+    let isMuted = false;
+    volumeButton.addEventListener('click', () => {
+        if (isMuted) {
+            audioPlayer.volume = 1;
+            volumeButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+            isMuted = false;
+        } else {
+            audioPlayer.volume = 0;
+            volumeButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            isMuted = true;
+        }
+    });
+    
+    // Auto-play next song
+    audioPlayer.addEventListener('ended', () => {
+        nextButton.click();
+    });
+    
+    // Background selector functionality
+    const bgButtons = document.querySelectorAll('.bg-button');
+    const body = document.body;
+    
+    // Remove todas as classes de background
+    function removeBackgroundClasses() {
+        body.classList.remove('bg-gradient-purple', 'bg-gradient-blue', 'bg-gradient-dark', 'bg-pattern-dots', 'bg-pattern-lines', 'bg-particles');
+    }
+    
+    // Adiciona event listeners para os botões de background
+    bgButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const bgClass = button.getAttribute('data-bg');
+            removeBackgroundClasses();
+            body.classList.add(bgClass);
+            
+            // Limpa o background padrão quando selecionar padrões específicos
+            if (bgClass === 'bg-pattern-dots' || bgClass === 'bg-pattern-lines') {
+                body.style.background = 'rgba(18, 18, 18, 1)';
+            } else {
+                body.style.background = '';
+            }
+            
+            // Salva a preferência do usuário no localStorage
+            localStorage.setItem('preferredBackground', bgClass);
+            
+            // Atualiza a aparência dos botões
+            bgButtons.forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+        });
+    });
+    
+    // Carrega a preferência de background salva, se existir
+    const savedBackground = localStorage.getItem('preferredBackground');
+    if (savedBackground) {
+        removeBackgroundClasses();
+        body.classList.add(savedBackground);
+        
+        // Limpa o background padrão quando selecionar padrões específicos
+        if (savedBackground === 'bg-pattern-dots' || savedBackground === 'bg-pattern-lines') {
+            body.style.background = 'rgba(18, 18, 18, 1)';
+        } else {
+            body.style.background = '';
+        }
+        
+        // Marca o botão correspondente como ativo
+        const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
+        if (activeButton) {
+            activeButton.classList.add('active');
+        }
+    }
 });
