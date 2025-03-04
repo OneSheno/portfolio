@@ -223,8 +223,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Buscar perfil imediatamente
     fetchDiscordProfile();
     
-    // Atualizar a cada 60 segundos
-    setInterval(fetchDiscordProfile, 60000);
+    // Atualizar a cada 30 segundos
+    setInterval(fetchDiscordProfile, 30000);
     
     // Music Player code
     const audioPlayer = document.getElementById('audio-player');
