@@ -364,28 +364,7 @@ document.addEventListener('DOMContentLoaded', function() {
     bgButtons.forEach(button => {
         button.addEventListener('click', () => {
             const bgClass = button.getAttribute('data-bg');
-            console.log("Selecionando background:", bgClass); // Log para debug
-            
-            // Remove todas as classes primeiro
-            removeBackgroundClasses();
-            
-            // Adiciona a classe selecionada
-            body.classList.add(bgClass);
-            
-            // Corrigindo a aplicação dos backgrounds de padrões
-            if (bgClass === 'bg-pattern-dots' || bgClass === 'bg-pattern-lines') {
-                // Usar removeProperty para limpar qualquer estilo inline que possa estar interferindo
-                body.style.removeProperty('background');
-                body.style.removeProperty('background-image');
-                body.style.removeProperty('background-size');
-                body.style.setProperty('background-color', 'rgba(18, 18, 18, 1)', 'important');
-            } else {
-                // Para gradientes, limpar completamente os estilos inline
-                body.style.removeProperty('background');
-                body.style.removeProperty('background-image');
-                body.style.removeProperty('background-size');
-                body.style.removeProperty('background-color');
-            }
+            console.log("Selecionando background:", bgClass);
             
             // Salva a preferência do usuário no localStorage
             localStorage.setItem('preferredBackground', bgClass);
@@ -394,7 +373,9 @@ document.addEventListener('DOMContentLoaded', function() {
             bgButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
             
-            console.log("Background aplicado e salvo:", bgClass); // Log para confirmar
+            // Força um recarregamento da página para aplicar o background
+            console.log("Recarregando a página para aplicar o background...");
+            location.reload();
         });
     });
     
