@@ -17,7 +17,6 @@ body {
     padding: 20px;
     position: relative;
     overflow: hidden;
-    transition: background 0.5s ease;
 }
 .profile-views {
     display: flex;
@@ -200,52 +199,58 @@ body {
 .song-info {
     display: flex;
     align-items: center;
+    margin-bottom: 10px;
 }
 .song-cover {
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     border-radius: 5px;
     margin-right: 10px;
+    object-fit: cover;
 }
 .song-details {
     flex: 1;
 }
 .song-title {
     font-weight: bold;
-    font-size: 14px;
+    margin-bottom: 5px;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 .song-artist {
-    color: #888;
-    font-size: 12px;
+    color: #aaa;
+    font-size: 14px;
 }
 .time-info {
     display: flex;
     justify-content: space-between;
     font-size: 12px;
-    color: #888;
+    color: #aaa;
+    margin-bottom: 5px;
 }
 .links {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
 }
 .link-card {
-    background: linear-gradient(45deg, #222, #2a2a2a);
-    padding: 16px;
-    border-radius: 8px;
-    text-decoration: none;
-    color: white;
     display: flex;
     align-items: center;
-    transition: all 0.3s ease;
-    border: 1px solid #333;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    background: rgba(34, 34, 34, 0.7);
+    border-radius: 12px;
+    text-decoration: none;
+    color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, background 0.3s ease;
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 .link-card:hover {
-    background: linear-gradient(45deg, #333, #3a3a3a);
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    border-color: #444;
+    transform: translateY(-3px);
+    background: rgba(40, 40, 40, 0.8);
 }
 .link-card i {
     font-size: 20px;
@@ -277,8 +282,6 @@ body {
     justify-content: center;
     margin-bottom: 20px;
     flex-wrap: wrap;
-    z-index: 100;
-    position: relative;
 }
 
 .bg-button {
@@ -290,7 +293,6 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     font-size: 14px;
-    z-index: 101;
 }
 
 .bg-button:hover {
@@ -305,37 +307,27 @@ body {
 }
 
 /* Custom Background Classes */
-body.bg-gradient-purple {
+.bg-gradient-purple {
     background: linear-gradient(135deg, #8A2BE2, #4B0082) !important;
-    background-size: cover !important;
-    background-attachment: fixed !important;
 }
 
-body.bg-gradient-blue {
+.bg-gradient-blue {
     background: linear-gradient(135deg, #1E90FF, #000080) !important;
-    background-size: cover !important;
-    background-attachment: fixed !important;
 }
 
-body.bg-gradient-dark {
+.bg-gradient-dark {
     background: linear-gradient(135deg, #2C3E50, #000000) !important;
-    background-size: cover !important;
-    background-attachment: fixed !important;
 }
 
-body.bg-pattern-dots {
-    background-color: rgba(18, 18, 18, 1) !important;
+.bg-pattern-dots {
     background-image: radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px) !important;
     background-size: 20px 20px !important;
-    background-attachment: fixed !important;
 }
 
-body.bg-pattern-lines {
-    background-color: rgba(18, 18, 18, 1) !important;
+.bg-pattern-lines {
     background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
                       linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px) !important;
     background-size: 20px 20px !important;
-    background-attachment: fixed !important;
 }
 
 /* Particle Background Styles */
@@ -347,4 +339,43 @@ body.bg-pattern-lines {
     height: 100%;
     z-index: 0;
     pointer-events: none;
+}
+
+/* Speech Bubble */
+.anime-speech {
+    position: fixed;
+    bottom: 110px;
+    right: 20px;
+    background: white;
+    color: #333;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    max-width: 200px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeIn 0.5s ease forwards;
+    animation-delay: 1s;
+    z-index: 1000;
+}
+
+.anime-speech:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 30px;
+    width: 0;
+    height: 0;
+    border: 10px solid transparent;
+    border-top-color: white;
+    border-bottom: 0;
+    margin-bottom: -10px;
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
