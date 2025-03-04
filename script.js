@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
+    console.log("DOM carregado, inicializando o site...");
+    
+    // Inicialização imediata do background
+    initializeBackground();
+    
     // Title animation
     const titles = ['Shennon the Coder', 'Shennon the Skidder'];
     const tabTitles = [
@@ -191,7 +196,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log("Dados completos recebidos:", data);
                 
                 if (data.success) {
-                    updateDiscordProfile(data.data);
+                    // Mapear os dados da Lanyard API para o formato esperado pelo updateDiscordProfile
+                    const mappedData = {
+                        discord_user: {
+                            username: data.data.discord_user.username,
+                            discriminator: data.data.discord_user.discriminator,
+                            avatar: data.data.discord_user.avatar
+                        },
+                        discord_status: data.data.discord_status,
+                        activities: data.data.activities
+                    };
+                    
+                    console.log("Dados mapeados:", mappedData);
+                    updateDiscordProfile(mappedData);
                 } else {
                     console.error("API retornou resposta sem sucesso");
                     fallbackDiscordInfo();
@@ -223,12 +240,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const songArtistElement = document.getElementById('song-artist');
     const songCoverElement = document.getElementById('song-cover');
     
-    // List of songs - using GitHub repository URLs
+    // List of songs - usando URLs diretos do GitHub para os arquivos de áudio
     const songs = [
         {
             title: "Your Betrayal",
             artist: "Bullet For My Valentine",
-            src: "./music/Bullet For My Valentine - Your Betrayal (Official Video) - bulletvalentineVEVO.mp3",
+            src: "https://github.com/shennon-zion/portfolio/raw/main/music/Bullet%20For%20My%20Valentine%20-%20Your%20Betrayal%20(Official%20Video)%20-%20bulletvalentineVEVO.mp3",
             cover: "https://i.ytimg.com/vi/IHgFJEJgUrg/maxresdefault.jpg"
         }
     ];
@@ -244,6 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
         songArtistElement.textContent = song.artist;
         songCoverElement.src = song.cover;
         audioPlayer.src = song.src;
+        console.log("Carregando música:", song.src);
         audioPlayer.load();
     }
     
@@ -346,14 +364,27 @@ document.addEventListener('DOMContentLoaded', function() {
     bgButtons.forEach(button => {
         button.addEventListener('click', () => {
             const bgClass = button.getAttribute('data-bg');
+            console.log("Selecionando background:", bgClass); // Log para debug
+            
+            // Remove todas as classes primeiro
             removeBackgroundClasses();
+            
+            // Adiciona a classe selecionada
             body.classList.add(bgClass);
             
-            // Limpa o background padrão quando selecionar padrões específicos
+            // Corrigindo a aplicação dos backgrounds de padrões
             if (bgClass === 'bg-pattern-dots' || bgClass === 'bg-pattern-lines') {
-                body.style.background = 'rgba(18, 18, 18, 1)';
+                // Usar removeProperty para limpar qualquer estilo inline que possa estar interferindo
+                body.style.removeProperty('background');
+                body.style.removeProperty('background-image');
+                body.style.removeProperty('background-size');
+                body.style.setProperty('background-color', 'rgba(18, 18, 18, 1)', 'important');
             } else {
-                body.style.background = '';
+                // Para gradientes, limpar completamente os estilos inline
+                body.style.removeProperty('background');
+                body.style.removeProperty('background-image');
+                body.style.removeProperty('background-size');
+                body.style.removeProperty('background-color');
             }
             
             // Salva a preferência do usuário no localStorage
@@ -362,26 +393,57 @@ document.addEventListener('DOMContentLoaded', function() {
             // Atualiza a aparência dos botões
             bgButtons.forEach(btn => btn.classList.remove('active'));
             button.classList.add('active');
+            
+            console.log("Background aplicado e salvo:", bgClass); // Log para confirmar
         });
     });
     
-    // Carrega a preferência de background salva, se existir
-    const savedBackground = localStorage.getItem('preferredBackground');
-    if (savedBackground) {
-        removeBackgroundClasses();
-        body.classList.add(savedBackground);
+    // Função de inicialização do background
+    function initializeBackground() {
+        // Verifica se há um background salvo
+        const savedBackground = localStorage.getItem('preferredBackground');
         
-        // Limpa o background padrão quando selecionar padrões específicos
-        if (savedBackground === 'bg-pattern-dots' || savedBackground === 'bg-pattern-lines') {
-            body.style.background = 'rgba(18, 18, 18, 1)';
+        if (savedBackground) {
+            console.log("Carregando background salvo:", savedBackground);
+            
+            // Remove todas as classes de background
+            removeBackgroundClasses();
+            
+            // Adiciona a classe salva
+            body.classList.add(savedBackground);
+            
+            // Corrigindo a aplicação dos backgrounds de padrões para o carregamento inicial
+            if (savedBackground === 'bg-pattern-dots' || savedBackground === 'bg-pattern-lines') {
+                // Usar removeProperty para limpar qualquer estilo inline que possa estar interferindo
+                body.style.removeProperty('background');
+                body.style.removeProperty('background-image');
+                body.style.removeProperty('background-size');
+                body.style.setProperty('background-color', 'rgba(18, 18, 18, 1)', 'important');
+            } else {
+                // Para gradientes, limpar completamente os estilos inline
+                body.style.removeProperty('background');
+                body.style.removeProperty('background-image');
+                body.style.removeProperty('background-size');
+                body.style.removeProperty('background-color');
+            }
+            
+            // Marca o botão correspondente como ativo
+            const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
         } else {
-            body.style.background = '';
-        }
-        
-        // Marca o botão correspondente como ativo
-        const activeButton = document.querySelector(`.bg-button[data-bg="${savedBackground}"]`);
-        if (activeButton) {
-            activeButton.classList.add('active');
+            // Define um background padrão se não houver um salvo
+            const defaultBg = 'bg-gradient-purple';
+            body.classList.add(defaultBg);
+            
+            const activeButton = document.querySelector(`.bg-button[data-bg="${defaultBg}"]`);
+            if (activeButton) {
+                activeButton.classList.add('active');
+            }
+            
+            // Salva o padrão
+            localStorage.setItem('preferredBackground', defaultBg);
         }
     }
 });
