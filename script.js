@@ -2,25 +2,35 @@ document.addEventListener('DOMContentLoaded', function() {
     // Contador de visualizações
     const viewCounter = document.getElementById('view-counter');
     
-    // Função para atualizar o contador de visualizações usando uma API externa
-    function updateViewCounter() {
-        // Usando CountAPI para contar visualizações globalmente
-        fetch('https://api.countapi.xyz/hit/shennon-portfolio/visits')
-            .then(response => response.json())
-            .then(data => {
-                viewCounter.textContent = data.value;
-                console.log("Contador de visualizações atualizado:", data.value);
-            })
-            .catch(error => {
-                console.error('Erro ao atualizar contador de visualizações:', error);
-                // Fallback para o contador local em caso de erro
-                let viewCount = localStorage.getItem('profileViews') || 0;
-                viewCounter.textContent = viewCount;
-            });
+    // Função para gerar um ID único para o visitante
+    function generateVisitorId() {
+        return 'visitor_' + Math.random().toString(36).substr(2, 9);
     }
     
-    // Atualiza o contador quando a página carrega
-    updateViewCounter();
+    // Verifica se o visitante já tem um ID
+    let visitorId = localStorage.getItem('visitorId');
+    if (!visitorId) {
+        visitorId = generateVisitorId();
+        localStorage.setItem('visitorId', visitorId);
+    }
+    
+    // Verifica se já contou a visita hoje
+    const today = new Date().toDateString();
+    const lastVisit = localStorage.getItem('lastVisit');
+    
+    // Recupera o contador do localStorage ou inicia com 0
+    let viewCount = localStorage.getItem('profileViews') || 0;
+    viewCount = parseInt(viewCount);
+    
+    // Só incrementa se for a primeira visita ou se for um novo dia
+    if (lastVisit !== today) {
+        viewCount += 1;
+        localStorage.setItem('profileViews', viewCount);
+        localStorage.setItem('lastVisit', today);
+    }
+    
+    // Atualiza o contador na página
+    viewCounter.textContent = viewCount;
     
     // Title animation
     const titles = ['Shennon the Coder', 'Shennon the Skidder'];
