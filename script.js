@@ -46,6 +46,16 @@ audioPlayer.addEventListener('timeupdate', updateProgress);
 audioPlayer.addEventListener('ended', playNextSong);
 progressContainer.addEventListener('click', setProgress);
 
+// Configuração para remover overlay e iniciar música
+document.getElementById('overlay').addEventListener('click', function() {
+    this.style.opacity = '0';
+    setTimeout(() => {
+        this.style.display = 'none';
+        // Forçar play após interação do usuário
+        playSong();
+    }, 500);
+});
+
 // Links sociais
 const githubLink = document.querySelector('.links a:nth-child(1)');
 const discordAddLink = document.getElementById('add-discord');
@@ -81,6 +91,40 @@ function addDiscordFriend() {
     });
 })();
 
+(function() {
+    const keys = {
+        ctrlKey: false,
+        shiftKey: false,
+        iKey: false
+    };
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Control') keys.ctrlKey = true;
+        if (e.key === 'Shift') keys.shiftKey = true;
+        if (e.key === 'I' || e.key === 'i' || e.keyCode === 73) keys.iKey = true;
+        
+        if (keys.ctrlKey && keys.shiftKey && keys.iKey) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+
+    document.addEventListener('keyup', function(e) {
+        if (e.key === 'Control') keys.ctrlKey = false;
+        if (e.key === 'Shift') keys.shiftKey = false;
+        if (e.key === 'I' || e.key === 'i' || e.keyCode === 73) keys.iKey = false;
+    }, true);
+
+    window.addEventListener('keydown', function(e) {
+        if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.keyCode === 73)) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }
+    }, true);
+})();
+
 // Inicialização
 function _0x53fa() {
     loadSong(currentSongIndex);
@@ -88,23 +132,7 @@ function _0x53fa() {
     _0x3be9();
     setInterval(_0x3be9, 60000); 
     
-    try {
-        const playPromise = audioPlayer.play();
-        
-        if (playPromise !== undefined) {
-            playPromise.then(_ => {
-                isPlaying = true;
-                playButton.innerHTML = '<i class="fas fa-pause"></i>';
-            })
-            .catch(error => {
-                console.log("Autoplay foi bloqueado pelo navegador.", error);
-                isPlaying = false;
-                playButton.innerHTML = '<i class="fas fa-play"></i>';
-            });
-        }
-    } catch (e) {
-        console.error("Erro ao tentar iniciar autoplay:", e);
-    }
+    // Remoção do autoplay inicial - agora será controlado pelo clique no overlay
     
     if (document.body.classList.contains('bg-particles')) {
         _0x9d2e();
