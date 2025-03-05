@@ -285,6 +285,22 @@ body {
     font-size: 16px;
 }
 
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    z-index: 9999;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: opacity 0.5s ease;
+}
+
 @media (max-width: 480px) {
     .container {
         padding: 15px;
@@ -440,4 +456,26 @@ body {
 /* Proteção anti-inspeção */
 @media print {
     html, body { display: none; }
+}
+
+/* Proteções adicionais contra inspeção */
+html {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* Impedir cópia de texto/código */
+body * {
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+/* Ajuste para não afetar a usabilidade de form inputs */
+input, textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
 }
