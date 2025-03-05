@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" oncontextmenu="return false;" ondragstart="return false;" onselectstart="return false;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,9 +13,66 @@
         link[rel="icon"] {
             border-radius: 50%;
         }
+        
+        /* Estilos para overlay de interação */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .overlay-content {
+            text-align: center;
+            color: white;
+        }
+        
+        .overlay-img {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            margin-bottom: 20px;
+            border: 3px solid #5865F2;
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 5px rgba(88, 101, 242, 0.5); }
+            50% { transform: scale(1.05); box-shadow: 0 0 15px rgba(88, 101, 242, 0.8); }
+            100% { transform: scale(1); box-shadow: 0 0 5px rgba(88, 101, 242, 0.5); }
+        }
     </style>
+    <script>
+        // Bloqueia atalhos antes mesmo do carregamento da página
+        document.addEventListener('keydown', function(e) {
+            if (
+                e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) ||
+                (e.ctrlKey && e.key === 'U')
+            ) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    </script>
 </head>
 <body class="bg-gradient-purple">
+    <!-- Overlay para forçar interação do usuário e iniciar áudio -->
+    <div id="overlay">
+        <div class="overlay-content">
+            <img src="https://i.pinimg.com/474x/e8/99/c4/e899c402060976f7611257f2810e9167.jpg" alt="Clique para continuar" class="overlay-img">
+            <p>Clique para continuar</p>
+        </div>
+    </div>
+    
     <div class="container">
         <div class="profile">
             <img src="https://i.pinimg.com/474x/e8/99/c4/e899c402060976f7611257f2810e9167.jpg" alt="Shennon" class="profile-pic">
